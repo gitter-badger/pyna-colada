@@ -1,0 +1,10 @@
+{
+	"type": "whisper",
+	"client": "Spiced Gracken",
+	"client_version": "v1.0.0a",
+	"sender": {
+		"name": "preston",
+		"location": "192.168.0.2"
+	},
+	"message": "Example whisper"
+}
