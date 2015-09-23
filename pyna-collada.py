@@ -1,4 +1,4 @@
-import json, socket, requests, threading, time
+import json, socket, requests, threading, time, sys
 
 class color:
     header = '\033[95m'
@@ -10,6 +10,7 @@ class color:
 
 def color_print(message,printed_color):
 	print(printed_color + message + color.end)
+
 
 
 # Main client class
@@ -32,29 +33,13 @@ class PynaClient(object):
 		if location not in self.active_server_list:
 			self.active_server_list.append(location)
 			color_print('ALERT: Activated {0}'.format(location),color.green)
+			self.connect_to(location)
 		if alias not in self.active_aliases:
 			self.active_aliases[alias] = location
 			color_print('ALERT: Registered {0} at {1}'.format(alias,location),color.green)
 
-	def handle_request(self,message):
-		packed_json = self.package('chat',message)
-		self.send_chat(packed_json)
-
-	# Send JSON to all active servers
-	def send_chat(self,json):
-		for active_server in self.active_server_list:
-			try:
-				requests.post('http://{0}'.format(active_server), json=json,headers={'Connection':'close'})
-			except:
-				pass
-
-	# Send JSON to a whisper target
-	def send_whisper(self,target_alias,json):
-		if target_alias in activate_aliases:
-			request_receipt = requests.post('http://{0}'.format(active_server), json=json)
-
 	# Package up our data. Most of this will be in a json file, but we're not quite there yet
-	def package(self,message_type,message):
+	def package(self,message_type,message=""):
 		data = {}
 		data['type'] = message_type
 		data['client'] = 'Pyña colada'
@@ -63,10 +48,42 @@ class PynaClient(object):
 		data['message'] = message
 		return data
 
+	# Waits for input from the user, then sends it off to be handled
 	def wait_for_input(self):
 		while True:
 			chat = input('{0}@{1}:  '.format(self.alias,self.location))
 			client.handle_request(chat)
+
+	# determines what to do with the string from wait_for_input
+	def handle_request(self,message):
+		if '/c ' in message[0:3]:
+			self.connect_to(message[3:])
+			return
+		packed_json = self.package('chat',message)
+		self.send_to_all(packed_json)
+
+	def connect_to(self,location):
+		connection_json = self.package('connection')
+		self.try_to_send(location,connection_json)
+
+	# Send JSON to all active servers
+	def send_to_all(self,json):
+		for active_server in self.active_server_list:
+			self.try_to_send(active_server,json)
+
+	# Send JSON to a whisper target
+	def send_to_alias(self,target_alias,json):
+		if target_alias in self.active_aliases:
+			self.try_to_send(self.active_aliases[target_alias],json)
+
+	# Try to send a POST
+	def try_to_send(self, target, json):
+		try:
+			requests.post('http://{0}'.format(target), json=json,headers={'Connection':'close'})
+		except:
+			pass
+
+
 
 
 
@@ -97,9 +114,9 @@ class PynaServer(object):
 			# Now we wait
 			connection, address = self.socket.accept()
 			response = connection.recv(1024)
+			connection.close()
 			(headers, js) = response.decode('utf-8').split("\r\n\r\n")
 			self.receive(js)
-			connection.close()
 			time.sleep(5)
 
 	# Handles receipt of the actual json we take in
@@ -121,8 +138,12 @@ class PynaServer(object):
 
 
 # Set up
-client = PynaClient('localhost:2008','neurotek')
-server = PynaServer(client,'localhost',2008)
+alias = sys.argv[1]
+address = sys.argv[2]
+port = sys.argv[3]
+
+client = PynaClient('{0}:{1}'.format(address,port),alias)
+server = PynaServer(client,address,int(port))
 server_thread = threading.Thread(target=server.listen)
 server_thread.daemon = True
 server_thread.start()
