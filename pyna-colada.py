@@ -133,6 +133,7 @@ class PynaServer(object):
         connection, address = self.sock.accept()
         response = connection.recv(1024)
         msg = json.loads(response.decode("utf-8"))
+        print('message received')
         if (msg['type'] == 'chat' or msg['type'] == 'whisper'):
             self.client.display(msg)
         #if msg['type'] == 'connection':
