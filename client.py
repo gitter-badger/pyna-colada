@@ -1,38 +1,22 @@
-import json, socket, requests, threading, time, sys, os
+import json, socket, sys
 from datetime import datetime, timezone
-
-def utc_to_local(utc_dt):
-    return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
-
-class color:
-    header = '\033[96m'
-    blue = '\033[94m'
-    green = '\033[92m'
-    gray = '\033[37m'
-    dark_gray = '\033[90m'
-    pyna_colada = '\033[93m'
-    warn = '\033[33m'
-    fail = '\033[91m'
-    end = '\033[0m'
-
-def color_print(message,printed_color):
-    print(printed_color + message + color.end)
-
-
+from utility import color, color_print, utc_to_local
 
 # Main client class
-class PynaClient(object):
+class PyNaClient(object):
     def __init__(self, location, alias):
         self.alias = alias
         self.active_server_list = []
         self.location = location
         self.active_aliases = {}
+        self.most_recent_whisperer = ""
 
     # show a message on the client
     def display(self, msg):
         if msg['type'] == 'whisper':
             # Format this differently
             color_print("{0} <W>: {1}".format(msg['sender']['name'], msg['message']),color.blue)
+            self.most_recent_whisperer = msg['sender']['name']
             return
         color_print("{0}: {1}".format(msg['sender']['name'], msg['message']),color.gray)
 
@@ -45,6 +29,7 @@ class PynaClient(object):
     def activate_server(self, location, alias=""):
         if location not in self.active_server_list:
             self.active_server_list.append(location)
+            self.connect_to(location)
         if alias is not "" and alias not in self.active_aliases:
             self.active_aliases[alias] = location
             color_print('Registered {0} at {1}'.format(alias,location),color.green)
@@ -70,11 +55,13 @@ class PynaClient(object):
     def wait_for_input(self):
         while True:
             chat = input('')
-            client.handle_request(chat)
+            self.handle_request(chat)
 
     # determines what to do with the string from wait_for_input
     def handle_request(self,message):
-        #try:
+        if message is "":
+            return
+
         if '/c ' in message[:3]:
             self.connect_to(message[3:])
             return
@@ -83,6 +70,10 @@ class PynaClient(object):
             alias = message[3:index_of_space]
             packed_json = self.package('whisper',message[index_of_space+1:])
             self.send_to_alias(alias,packed_json)
+            return
+        if 'r ' in message[:3]:
+            packed_json = self.package('whisper',message[3:])
+            self.send_to_alias(self.most_recent_whisperer,packed_json)
             return
         if '/x' in message[:2]:
             color_print('Closing down server. Thank you for using PyÑa Colada!',color.pyna_colada)
@@ -121,19 +112,21 @@ class PynaClient(object):
         if target_alias in self.active_aliases:
             self.try_to_send(self.active_aliases[target_alias],json)
         else:
-            printed_color('No one hears you...',color.blue)
+            color_print('No one hears you...',color.blue)
 
     # Try to send over socket
     def try_to_send(self, target, js, hide_output=False):
         if target == '{0}'.format(self.location):
             return
         address, port = target.split(':')
+        #color_print('sending {0} message to {1}:{2}'.format(js['type'],address,port),color.green)
         message = str.encode(str(json.dumps(js)))
         total_sent = 0
         # create the socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.settimeout(1.0)
             self.sock.connect((address,int(port)))
             while total_sent < len(message):
                 sent = self.sock.send(message[total_sent:])
@@ -141,99 +134,9 @@ class PynaClient(object):
                     raise RuntimeError('Connection closed erroneously')
                 total_sent = total_sent + sent
             self.sock.close()
-            #color_print('{0} message sent to {1}:{2} successfully'.format(js['type'],address,port),color.green)
             self.activate_server(target)
         except Exception as msg:
             #color_print('{0}:{1} -- {2}'.format(address,port,msg),color.fail)
             if not hide_output:
                 color_print('mesh-chat application does not appear to exist at {0}:{1}'.format(address,port),color.warn)
             self.deactivate_server(target)
-
-
-# Main server clas
-class PynaServer(object):
-    def __init__(self, client, address, port):
-        self.server_config = json.load(open('serverconfig.json','r'))
-        color_print('Welcome to PyÑa Colada Server v{0}'.format(self.server_config['serverVersion']),color.pyna_colada)
-        self.authorized_server_list = []
-        self.client = client
-        self.address = address
-        self.port = port
-        self.load_servers()
-        self.client.ping_all(self.authorized_server_list)
-
-    # This is the big part where we are waiting for messages
-    def listen(self):
-        try:
-            # Try to bind the socket
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind((self.address, self.port))
-            self.sock.listen(1)
-            self.client.sock = self.sock
-            color_print('Server running on {0}:{1}\n'.format(self.address,self.port),color.green)
-        except socket.error as msg:
-            # No dice. Kill the process.
-            self.sock = None
-            color_print('ERROR: Unable to bind socket: {0}'.format(msg),color.fail)
-            return
-        while self.sock is not None:
-            # Now we wait
-            self.receive()
-            time.sleep(1)
-
-    # Handles receipt of the actual json we take in
-    def receive(self):
-        connection, address = self.sock.accept()
-        response = connection.recv(1024)
-        msg = json.loads(response.decode("utf-8"))
-        self.connect(msg['sender'])
-        if (msg['type'] == 'chat' or msg['type'] == 'whisper'):
-            self.client.display(msg)
-        if msg['type'] == 'connection':
-            self.connect(msg['sender'])
-        if msg['type'] == 'disconnection':
-            self.client.disconnect(msg['sender'])
-
-    # For new connections
-    def connect(self, sender):
-        self.client.activate_server(sender['location'],sender['name'])
-        if sender['location'] not in self.authorized_server_list:
-            self.authorized_server_list.append(sender['location'])
-            with open('authorizedservers.json','r') as auth:
-                data = json.load(auth)
-            data.update({"servers":self.authorized_server_list})
-            with open('authorizedservers.json','w') as auth:
-                json.dump(data, auth)
-
-    def load_servers(self):
-        with open('authorizedservers.json','r') as auth:
-            data = json.load(auth)
-        for server in data['servers']:
-            if server not in self.authorized_server_list:
-                self.authorized_server_list.append(server)
-
-
-# Get the local ip address
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(('8.8.8.8', 0))  # connecting to a UDP address doesn't send packets
-address = s.getsockname()[0]
-s.close()
-
-# Grab cmdline args and config.json
-alias = sys.argv[1]
-port = sys.argv[2]
-
-# Build the client
-client = PynaClient('{0}:{1}'.format(address,port),alias)
-
-# start the server up
-server = PynaServer(client,address,int(port))
-server_thread = threading.Thread(target=server.listen)
-server_thread.daemon = True
-server_thread.start()
-
-# Await initialization before starting client thread
-time.sleep(1)
-client_thread = threading.Thread(target=client.wait_for_input)
-client_thread.start()
