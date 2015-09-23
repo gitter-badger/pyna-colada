@@ -1,4 +1,4 @@
-import json, socket, requests, threading, time, sys
+import json, socket, requests, threading, time, sys, os
 from datetime import datetime, timezone
 
 def utc_to_local(utc_dt):
@@ -9,6 +9,7 @@ class color:
     blue = '\033[94m'
     green = '\033[92m'
     gray = '\033[37m'
+    dark_gray = '\033[90m'
     pyna_colada = '\033[93m'
     warn = '\033[33m'
     fail = '\033[91m'
@@ -34,6 +35,11 @@ class PynaClient(object):
             color_print("{0} <W>: {1}".format(msg['sender']['name'], msg['message']),color.blue)
             return
         color_print("{0}: {1}".format(msg['sender']['name'], msg['message']),color.gray)
+
+    def disconnect(self,sender):
+        color_print("{0} ({1}) has disconnected".format(sender['name'],sender['location']),color.dark_gray)
+        self.deactivate_server(sender['location'])
+
 
     # Try to activate the server, or at least the alias
     def activate_server(self, location, alias=""):
@@ -68,20 +74,32 @@ class PynaClient(object):
 
     # determines what to do with the string from wait_for_input
     def handle_request(self,message):
-        try:
-            if '/c ' in message[0:3]:
-                self.connect_to(message[3:])
-                return
-            if '/w ' in message[0:3]:
-                index_of_space = 3 + message[3:].index(' ')
-                alias = message[3:index_of_space]
-                packed_json = self.package('whisper',message[index_of_space+1:])
-                self.send_to_alias(alias,packed_json)
-                return
-            packed_json = self.package('chat',message)
-            self.send_to_all(packed_json)
-        except:
-            color_print('Please format your request appropriately',color.warn)
+        #try:
+        if '/c ' in message[:3]:
+            self.connect_to(message[3:])
+            return
+        if '/w ' in message[:3]:
+            index_of_space = 3 + message[3:].index(' ')
+            alias = message[3:index_of_space]
+            packed_json = self.package('whisper',message[index_of_space+1:])
+            self.send_to_alias(alias,packed_json)
+            return
+        if '/x' in message[:2]:
+            color_print('Closing down server. Thank you for using PyÑa Colada!',color.pyna_colada)
+            close_message = self.package('disconnection')
+            self.send_to_all(close_message)
+            sys.exit(0)
+            return
+        if '/servers' in message[:8]:
+            print(self.active_server_list)
+            print()
+            return
+        if '/who' in message[:4]:
+            print(list(self.active_aliases.keys()))
+            print()
+            return
+        packed_json = self.package('chat',message)
+        self.send_to_all(packed_json)
 
     def connect_to(self,location):
         connection_json = self.package('connection')
@@ -174,7 +192,8 @@ class PynaServer(object):
             self.client.display(msg)
         if msg['type'] == 'connection':
             self.connect(msg['sender'])
-        # Nonetheless, try to activate the server on the client
+        if msg['type'] == 'disconnection':
+            self.client.disconnect(msg['sender'])
 
     # For new connections
     def connect(self, sender):
