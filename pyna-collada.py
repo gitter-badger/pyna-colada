@@ -1,7 +1,18 @@
-import json, socket, requests
-from multiprocessing import Process
-from multiprocessing.managers import BaseManager
+import json, socket, requests, threading, time
 
+class color:
+    header = '\033[95m'
+    blue = '\033[94m'
+    green = '\033[92m'
+    warning = '\033[93m'
+    fail = '\033[91m'
+    end = '\033[0m'
+
+def color_print(message,printed_color):
+	print(printed_color + message + color.end)
+
+
+# Main client class
 class PynaClient(object):
 	def __init__(self, location, alias="anonymous"):
 		self.alias = alias
@@ -11,21 +22,19 @@ class PynaClient(object):
 
 	# show a message on the client
 	def display(self, msg):
-		displayed_message = "{0}: {1}".format(msg['sender']['name'], msg['message'])
 		if msg['type'] == 'whisper':
 			# Format this differently
-			displayed_message = "{0} <W>: {1}".format(msg['sender']['name'], msg['message'])
-		print(displayed_message)
+			color_print("{0} <W>: {1}".format(msg['sender']['name'], msg['message']),color.blue)
+		color_print("{0}: {1}".format(msg['sender']['name'], msg['message']),color.header)
 
 	# Try to activate the server, or at least the alias
 	def activate_server(self, location, alias):
 		if location not in self.active_server_list:
 			self.active_server_list.append(location)
-			print('Activated {0}'.format(location))
+			color_print('ALERT: Activated {0}'.format(location),color.green)
 		if alias not in self.active_aliases:
 			self.active_aliases[alias] = location
-			print('Registered {0} at {1}'.format(alias,location))
-		print('serverlist: {0}'.format(self.active_server_list))
+			color_print('ALERT: Registered {0} at {1}'.format(alias,location),color.green)
 
 	def handle_request(self,message):
 		packed_json = self.package('chat',message)
@@ -33,10 +42,11 @@ class PynaClient(object):
 
 	# Send JSON to all active servers
 	def send_chat(self,json):
-		print(self.active_server_list)
 		for active_server in self.active_server_list:
-			print(active_server)
-			request_receipt = requests.post('http://{0}'.format(active_server), json=json)
+			try:
+				requests.post('http://{0}'.format(active_server), json=json,headers={'Connection':'close'})
+			except:
+				pass
 
 	# Send JSON to a whisper target
 	def send_whisper(self,target_alias,json):
@@ -53,33 +63,33 @@ class PynaClient(object):
 		data['message'] = message
 		return data
 
+	def wait_for_input(self):
+		while True:
+			chat = input('{0}@{1}:  '.format(self.alias,self.location))
+			client.handle_request(chat)
+
+
+
+
+# Main server clas
 class PynaServer(object):
 	def __init__(self, client, address='localhost',port=2008):
 		self.authorized_server_list = []
 		self.client = client
 		self.address = address
-		self.listen(port)
-
-	# Try to activate the server, or at least the alias
-	def activate_server(self, location, alias):
-		if location not in self.active_server_list:
-			self.active_server_list.append(location)
-			print('Activated {0}'.format(location))
-		if alias not in self.active_aliases:
-			self.active_aliases[alias] = location
-			print('Registered {0} at {1}'.format(alias,location))
+		self.port = port
 
 	# This is the big part where we are waiting for messages
-	def listen(self,port):
+	def listen(self):
 		try:
 			# Try to bind the socket
 			self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-			self.socket.bind((self.address, port))
-			print('Socket bound appropriately')
+			self.socket.bind((self.address, self.port))
+			color_print('Socket bound appropriately',color.green)
 		except socket.error as msg:
 			# No dice. Kill the process.
-			print('Unable to bind socket: {0}'.format(msg))
+			color_print('Unable to bind socket: {0}'.format(msg),color.fail)
 			self.socket = None
 			return
 		self.socket.listen(1)
@@ -90,6 +100,7 @@ class PynaServer(object):
 			(headers, js) = response.decode('utf-8').split("\r\n\r\n")
 			self.receive(js)
 			connection.close()
+			time.sleep(5)
 
 	# Handles receipt of the actual json we take in
 	def receive(self, message):
@@ -106,9 +117,17 @@ class PynaServer(object):
 		if sender['location'] not in self.authorized_server_list:
 			self.authorized_server_list.append(sender['location'])
 
+
+
+
+# Set up
 client = PynaClient('localhost:2008','neurotek')
-server = Process(target=PynaServer,args=(client,'localhost',2008))
-server.start()
-while True:
-	chat = input('')
-	client.handle_request(chat)
+server = PynaServer(client,'localhost',2008)
+server_thread = threading.Thread(target=server.listen)
+server_thread.daemon = True
+server_thread.start()
+
+#Await initialization
+time.sleep(1)
+client_thread = threading.Thread(target=client.wait_for_input)
+client_thread.start()
