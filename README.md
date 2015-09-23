@@ -14,11 +14,13 @@ Download this project as a Zip, then extract it to a folder of your choice. In a
 From here, all you need to do is connect (details as follows) and then send messages.
 
 ##Available Operations
+* `[message]` sends a message to all activated servers
 * `/c [ip-address]:[port]` connects to another mesh-chat server
 * `/w [alias] [message]` whispers a message to the user with specified alias, if it exists
-* `[message]` sends a message to all activated servers
+* `/servers` returns a list of all servers connected in the mesh network
+* `/who` returns a list of all aliases available to your current instance
+* `/x` shuts this mesh-chat server down
 
 ##Future Features
 * Authorization of servers
-* Auto-scanning of serverlist for all active servers
-* Cached serverlist
+* Serverlist sharing
