@@ -48,7 +48,7 @@ class PyNaClient(object):
         data['time_sent'] = utc_to_local(datetime.now(timezone.utc)).strftime("%Y-%m-%d %H:%M:%S")
         data["client"] = "Pyna colada"
         data["client_version"] = "v" + self.version
-        data["sender"] = {"name": self.alias, "location": self.location}
+        data["sender"] = {"name": self.alias, "location": self.location, "uid": self.uid}
         data["message"] = message
         return data
 
@@ -65,7 +65,9 @@ class PyNaClient(object):
 
         # User wants to connect to a specific ip:port pair
         if '/c ' in message[:3]:
-            self.send_connection(message[3:])
+            connection_message = self.create_message('connection')
+            location = message[3:]
+            self.try_to_send(location,connection_message)
             return
         # User wants to whisper to an alias (if it exists)
         if '/w ' in message[:3]:
@@ -77,14 +79,15 @@ class PyNaClient(object):
             except:
                 color_print('Cannot send a whisper without a message.',color.dark_gray)
                 return
-            alias = message[3:index_of_space]
-            packed_json = self.create_message('whisper',message[index_of_space+1:])
-            self.send_to_alias(alias,packed_json)
+            whisper_to_location = self.get_location(message[3:index_of_space])
+            whisper_message = self.create_message('whisper',message[index_of_space+1:])
+            self.try_to_send(whisper_to_location,whisper_message)
             return
         # User wants to reply to the most recent whisperer (if it exists)
         if '/r ' in message[:3]:
-            packed_json = self.create_message('whisper',message[3:])
-            self.send_to_alias(self.most_recent_whisperer,packed_json)
+            whisper_message = self.create_message('whisper',message[3:])
+            whisper_to_location = self.active_aliases[self.most_recent_whisperer]
+            self.try_to_send(whisper_to_location,whisper_message)
             return
         # User wants to disconnect this node
         if '/x' in message[:2]:
@@ -92,6 +95,17 @@ class PyNaClient(object):
             close_message = self.create_message('disconnection')
             self.send_to_all(close_message)
             sys.exit(0)
+            return
+        # User wants to ping its active serverlist
+        if '/pingall' in message[:8]:
+            packed_json = self.create_message('ping')
+            self.send_to_all(packed_json)
+            return
+        # User wants a ping update from only a specific node
+        if '/ping ' in message[:6]:
+            packed_json = self.create_message('ping')
+            location = self.get_location(message[6:])
+            self.try_to_send(location,packed_json)
             return
         # User wants to know more information about an alias or ipaddress
         if '/? ' in message[:3]:
@@ -113,7 +127,6 @@ class PyNaClient(object):
                 return
             # found nothing
             color_print('No user or node was found with key \'{0}\''.format(key),color.dark_gray)
-
         # User wants to know what servers are active
         if '/servers' in message[:8]:
             print('Active servers:  {0}\n'.format(list(self.active_server_list)))
@@ -133,9 +146,9 @@ class PyNaClient(object):
         self.send_to_all(packed_json)
 
     # Send a Connection message to a location
-    def send_connection(self,location):
-        connection_json = self.create_message('connection')
-        self.try_to_send(location,connection_json)
+    def send_type_to_location(self,message_type,location):
+        message = self.create_message(message_type)
+        self.try_to_send(location,message)
 
     # Called by server to see which authorized servers are active
     def ping_all(self,authorized_server_list):
@@ -148,12 +161,15 @@ class PyNaClient(object):
         for active_server in self.active_server_list:
             self.try_to_send(active_server,json)
 
-    # Send JSON to a whisper target
-    def send_to_alias(self,target_alias,json):
-        if target_alias in self.active_aliases:
-            self.try_to_send(self.active_aliases[target_alias],json)
-        else:
-            color_print('No one hears you...',color.blue)
+    # not sure if the user typed in a location or alias, so try to get a location
+    def get_location(self,key):
+        # if key is an alias
+        if key in self.active_aliases:
+            return self.active_aliases[key]
+
+        # if key is a location
+        if key in self.active_server_list:
+            return key
 
     # dummy; sends a serverlist hash to a newly-connecting node
     def send_serverlisthash(self, target):
@@ -186,8 +202,8 @@ class PyNaClient(object):
                     raise RuntimeError('Connection closed erroneously')
                 total_sent = total_sent + sent
         except Exception as msg:
-            if not hide_output:
-                color_print('mesh-chat application does not appear to exist at {0}:{1}'.format(address,port),color.warn)
+            if js['type'] != 'connection':
+                color_print('{2}... mesh-chat application does not appear to exist at {0}:{1}'.format(address,port,js['type']),color.warn)
                 self.deactivate_server(target)
             return
         # everything went according to plan, close the socket and activate the server

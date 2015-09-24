@@ -11,8 +11,8 @@ class PyNaServer(object):
         self.server_config = json.load(open('config/config.json','r'))
         color_print('Welcome to \033[1mPyÑa Colada' + color.end + color.pyna_colada +' Server v{0}'.format(self.server_config['serverVersion']),color.pyna_colada)
         self.client.version = self.server_config['clientVersion']
+        self.client.uid = self.server_config['uid']
         self.load_in_servers()
-        self.client.ping_all(self.authorized_server_list)
 
     # This is the big part where we are waiting for messages
     def __running__(self):
@@ -31,6 +31,8 @@ class PyNaServer(object):
         self.sock.listen(1)
         self.client.sock = self.sock
         color_print('Server running on {0}:{1}\n'.format(self.address,self.port),color.green)
+        # Ask the client to ping all servers
+        self.client.ping_all(self.authorized_server_list)
         while self.sock is not None:
             # Now we wait
             self.receive()
@@ -49,6 +51,8 @@ class PyNaServer(object):
             self.client.display_message(msg)
         if msg['type'] == 'disconnection':
             self.client.disconnect_notify(msg['sender'])
+        if msg['type'] == 'ping':
+            self.client.send_type_to_location('pingreply',msg['sender']['location'])
 
     # For new connections
     def connect(self, sender):
