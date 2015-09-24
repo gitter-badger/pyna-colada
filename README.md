@@ -1,5 +1,6 @@
-#PyÑa Colada
+#PyÑa Colada [![Code Climate](https://codeclimate.com/github/etkirsch/pyna-colada/badges/gpa.svg)](https://codeclimate.com/github/etkirsch/pyna-colada) [![Test Coverage](https://codeclimate.com/github/etkirsch/pyna-colada/badges/coverage.svg)](https://codeclimate.com/github/etkirsch/pyna-colada/coverage)
 A `mesh-chat` application built in Python 3.4.3
+
 
 ##Installation and Running
 NOTE: To run PyÑa Colada, you need to have at least Python 3.4 installed on a Linux device.
@@ -17,8 +18,11 @@ From here, all you need to do is connect (details as follows) and then send mess
 * `[message]` sends a message to all activated servers
 * `/c [ip-address]:[port]` connects to another mesh-chat server
 * `/w [alias] [message]` whispers a message to the user with specified alias, if it exists
+* `/r [message]` whispers a message to the most recent person to whisper to you
 * `/servers` returns a list of all servers connected in the mesh network
 * `/who` returns a list of all aliases available to your current instance
+* `/? [alias]` returns all available information about an active alias
+* `/about` provides information about the node you are running
 * `/x` shuts this mesh-chat server down
 
 ##Future Features
