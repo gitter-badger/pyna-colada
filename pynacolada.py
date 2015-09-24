@@ -24,12 +24,12 @@ client = PyNaClient('{0}:{1}'.format(address,port),alias)
 
 # start the server up
 server = PyNaServer(client,address,int(port))
-server_thread = threading.Thread(target=server.listen)
+server_thread = threading.Thread(target=server.__running__)
 server_thread.daemon = True
 server_thread.start()
 
 
 # Await initialization before starting client thread
 time.sleep(1)
-client_thread = threading.Thread(target=client.wait_for_input)
+client_thread = threading.Thread(target=client.__running__)
 client_thread.start()
