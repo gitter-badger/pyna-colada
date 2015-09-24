@@ -69,7 +69,14 @@ class PyNaClient(object):
             return
         # User wants to whisper to an alias (if it exists)
         if '/w ' in message[:3]:
-            index_of_space = 3 + message[3:].index(' ')
+            if len(message) is 3:
+                color_print('Cannot send a whisper without a target or message.',color.dark_gray)
+                return
+            try:
+                index_of_space = 3 + message[3:].index(' ')
+            except:
+                color_print('Cannot send a whisper without a message.',color.dark_gray)
+                return
             alias = message[3:index_of_space]
             packed_json = self.create_message('whisper',message[index_of_space+1:])
             self.send_to_alias(alias,packed_json)
@@ -86,6 +93,27 @@ class PyNaClient(object):
             self.send_to_all(close_message)
             sys.exit(0)
             return
+        # User wants to know more information about an alias or ipaddress
+        if '/? ' in message[:3]:
+            key = message[3:]
+            # if this is an alias
+            if key in self.active_aliases:
+                color_print('User \'{0}\' at location {1}'.format(key,self.active_aliases[key]),color.dark_gray)
+                return
+            # if this is an ipaddress
+            if key in self.active_server_list:
+                # look for the corresponding alias for this address. Not pretty but it works
+                if key in self.active_aliases.values():
+                    for alias in self.active_aliases.items():
+                        if alias[1] == key:
+                            color_print('User \'{0}\' at location {1}'.format(alias[0],key),color.dark_gray)
+                            return
+                # in case there is no known user alias
+                color_print('Unknown user at location {0}'.format(key),color.dark_gray)
+                return
+            # found nothing
+            color_print('No user or node was found with key \'{0}\''.format(key),color.dark_gray)
+
         # User wants to know what servers are active
         if '/servers' in message[:8]:
             print('Active servers:  {0}\n'.format(list(self.active_server_list)))
@@ -160,7 +188,7 @@ class PyNaClient(object):
         except Exception as msg:
             if not hide_output:
                 color_print('mesh-chat application does not appear to exist at {0}:{1}'.format(address,port),color.warn)
-            self.deactivate_server(target)
+                self.deactivate_server(target)
             return
         # everything went according to plan, close the socket and activate the server
         self.sock.close()
