@@ -20,20 +20,17 @@ class Interpreter(object):
 			return
 		if msg['type'] == 'connection':
 			self.inputhandler.send_type_to_location('serverlisthash',msg['sender']['location'])
-			self.display.info('received connection request from {0}'.format(msg['sender']))
-			return
-		if msg['type'] == 'serverlisthash':
-			self.display.info('received serverlisthash request from {0}'.format(msg['sender']))
-			return
-		if msg['type'] == 'pingreply':
-			self.display.info('received pingreply from {0}'.format(msg['sender']))
 			return
 		if msg['type'] == 'whisper':
 			self.manager.most_recent_whisperer = msg['sender']['name']
+		self.message_notify(msg)
 		self.display.display(msg)
 
 	def ping_all(self):
 		self.inputhandler.ping_all()
+
+	def message_notify(self,msg):
+		self.display.info('Received {0} request from {1}'.format(msg['type'],msg['sender']))
 
 	# For new connections
 	def connect(self, sender):

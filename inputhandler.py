@@ -104,6 +104,7 @@ class InputHandler(object):
 	def ping_all(self):
 		ping_json = self.packager.pack('ping')
 		for address in self.configuration.authorized_server_list:
+			self.display.log('Pinging ' + address)
 			self.sender.try_to_send(address,ping_json)
 
 	# not sure if the user typed in a location or alias, so try to get a location

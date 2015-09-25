@@ -22,8 +22,8 @@ class Display(object):
 		# If this is a whisper, format as blue
 		if msg['type'] == 'whisper':
 			self.whisper(sender_tag,message)
-			return
-		self.chat(sender_tag,message)
+		if msg['type'] == 'chat':
+			self.chat(sender_tag,message)
 
 	def chat(self, sender_tag,message, chat_color=color.gray):
 		sender_tag = self.bold(sender_tag,chat_color)

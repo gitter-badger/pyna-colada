@@ -16,6 +16,8 @@ class Sender(object):
         except ValueError:
             self.display.warn('ERROR: Port was not specified\n')
             return False
+        except AttributeError:
+            self.display.warn('ERROR: No user was found at this port')
         # encode the json and create the socket
         message = str.encode(str(json.dumps(js)))
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
