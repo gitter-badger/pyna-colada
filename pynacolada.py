@@ -1,6 +1,5 @@
-import socket, threading, sys, time
-from server import PyNaServer
-from client import PyNaClient
+import socket, sys
+from node import Node
 
 # Get the local ip address
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -18,18 +17,4 @@ else:
     if port is "":
         port = 8080
 
-
-# Build the client
-client = PyNaClient('{0}:{1}'.format(address,port),alias)
-
-# start the server up
-server = PyNaServer(client,address,int(port))
-server_thread = threading.Thread(target=server.__running__)
-server_thread.daemon = True
-server_thread.start()
-
-
-# Await initialization before starting client thread
-time.sleep(1)
-client_thread = threading.Thread(target=client.__running__)
-client_thread.start()
+node = Node(alias,address,port)

@@ -1,5 +1,5 @@
 import json, socket, time, sys
-from core.display import Display
+from display import Display
 
 # Main server clas
 class SocketListener(object):
@@ -20,15 +20,18 @@ class SocketListener(object):
             return
         # We have a working socket, set it up and inform the user
         self.sock.listen(1)
-        self.client.sock = self.sock
 
     # Create a socket then log everything that we receive
     def __running__(self):
         self.create_socket()
         while self.sock is not None:
             msg = self.receive_from_socket()
-            self.log(msg)
+            self.interpret_message(msg)
             time.sleep(1)
+
+    # do something with the message we have received
+    def interpret_message(self,msg):
+        print(msg)
 
     # receive a message on our socket
     def receive_from_socket(self):
