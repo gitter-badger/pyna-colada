@@ -1,5 +1,5 @@
 import socket, threading, sys, time
-from server import PyNaServer
+from pynaserver import PyNaServer
 from client import PyNaClient
 
 # Get the local ip address

@@ -1,9 +1,9 @@
 import json, socket, sys
 from datetime import datetime, timezone
-from utility import color, color_print, utc_to_local
+from pynaEntity import PynaEntity
 
 # Main client class
-class PyNaClient(object):
+class PyNaClient(PynaEntity):
     def __init__(self, location, alias):
         self.alias = alias
         self.active_server_list = []
@@ -15,14 +15,14 @@ class PyNaClient(object):
     def display_message(self, msg):
         if msg['type'] == 'whisper':
             # Format this differently
-            color_print("{0} <W>: {1}".format(msg['sender']['name'], msg['message']),color.blue)
+            color_print("{0} <W>: {1}".format(msg['sender']['name'], msg['message']),self.color.blue)
             self.most_recent_whisperer = msg['sender']['name']
             return
-        color_print("{0}: {1}".format(msg['sender']['name'], msg['message']),color.gray)
+        self.color_print("{0}: {1}".format(msg['sender']['name'], msg['message']),self.color.gray)
 
     # Notify user that a node has disconnected
     def disconnect_notify(self,sender):
-        color_print("{0} ({1}) has disconnected".format(sender['name'],sender['location']),color.dark_gray)
+        self.color_print("{0} ({1}) has disconnected".format(sender['name'],sender['location']),self.color.dark_gray)
         self.deactivate_server(sender['location'])
 
     # Try to add the alias/location to active servers and active aliases
@@ -32,7 +32,7 @@ class PyNaClient(object):
             self.send_serverlisthash(location)
         if alias is not "" and alias not in self.active_aliases:
             self.active_aliases[alias] = location
-            color_print('Registered {0} at {1}'.format(alias,location),color.green)
+            self.color_print('Registered {0} at {1}'.format(alias,location),self.color.green)
 
     # remove an ip address (location) from active_server_list and its aliases
     def deactivate_server(self, location):
@@ -45,7 +45,7 @@ class PyNaClient(object):
     def create_message(self,message_type,message=""):
         data = {}
         data["type"] = message_type
-        data['time_sent'] = utc_to_local(datetime.now(timezone.utc)).strftime("%Y-%m-%d %H:%M:%S")
+        data['time_sent'] = self.utc_to_local(datetime.now(timezone.utc)).strftime("%Y-%m-%d %H:%M:%S")
         data["client"] = "Pyna colada"
         data["client_version"] = "v" + self.version
         data["sender"] = {"name": self.alias, "location": self.location, "uid": self.uid}
@@ -72,12 +72,12 @@ class PyNaClient(object):
         # User wants to whisper to an alias (if it exists)
         if '/w ' in message[:3]:
             if len(message) is 3:
-                color_print('Cannot send a whisper without a target or message.',color.dark_gray)
+                self.color_print('Cannot send a whisper without a target or message.',self.color.dark_gray)
                 return
             try:
                 index_of_space = 3 + message[3:].index(' ')
             except:
-                color_print('Cannot send a whisper without a message.',color.dark_gray)
+                self.color_print('Cannot send a whisper without a message.',self.color.dark_gray)
                 return
             whisper_to_location = self.get_location(message[3:index_of_space])
             whisper_message = self.create_message('whisper',message[index_of_space+1:])
@@ -91,7 +91,7 @@ class PyNaClient(object):
             return
         # User wants to disconnect this node
         if '/x' in message[:2]:
-            color_print('Closing down server. Thank you for using PyÑa Colada!',color.pyna_colada)
+            self.color_print('Closing down server. Thank you for using PyÑa Colada!',self.color.pyna_colada)
             close_message = self.create_message('disconnection')
             self.send_to_all(close_message)
             sys.exit(0)
@@ -112,7 +112,7 @@ class PyNaClient(object):
             key = message[3:]
             # if this is an alias
             if key in self.active_aliases:
-                color_print('User \'{0}\' at location {1}'.format(key,self.active_aliases[key]),color.dark_gray)
+                self.color_print('User \'{0}\' at location {1}'.format(key,self.active_aliases[key]),self.color.dark_gray)
                 return
             # if this is an ipaddress
             if key in self.active_server_list:
@@ -120,13 +120,13 @@ class PyNaClient(object):
                 if key in self.active_aliases.values():
                     for alias in self.active_aliases.items():
                         if alias[1] == key:
-                            color_print('User \'{0}\' at location {1}'.format(alias[0],key),color.dark_gray)
+                            self.color_print('User \'{0}\' at location {1}'.format(alias[0],key),self.color.dark_gray)
                             return
                 # in case there is no known user alias
-                color_print('Unknown user at location {0}'.format(key),color.dark_gray)
+                self.color_print('Unknown user at location {0}'.format(key),self.color.dark_gray)
                 return
             # found nothing
-            color_print('No user or node was found with key \'{0}\''.format(key),color.dark_gray)
+            self.color_print('No user or node was found with key \'{0}\''.format(key),self.color.dark_gray)
         # User wants to know what servers are active
         if '/servers' in message[:8]:
             print('Active servers:  {0}\n'.format(list(self.active_server_list)))
@@ -137,8 +137,8 @@ class PyNaClient(object):
             return
         # User wants to know more about the application
         if '/about' in message[:6]:
-            color_print('\033[1mPyÑa Colada ' + color.end + color.pyna_colada + 'Node v' + self.version, color.pyna_colada)
-            color_print('A ' + color.gray + '\033[1mmesh-chat' + color.end + color.dark_gray +' type application written by Evan Kirsch (2015)\n', color.dark_gray)
+            self.color_print('\033[1mPyÑa Colada ' + color.end + color.pyna_colada + 'Node v' + self.version, self.color.pyna_colada)
+            self.color_print('A ' + color.gray + '\033[1mmesh-chat' + color.end + color.dark_gray +' type application written by Evan Kirsch (2015)\n', self.color.dark_gray)
             return
 
         # default: send a chat message
@@ -185,7 +185,7 @@ class PyNaClient(object):
         try:
             address, port = target.split(':')
         except ValueError:
-            color_print('ERROR: Port was not specified\n',color.warn)
+            self.color_print('ERROR: Port was not specified\n',self.color.warn)
             return
         # encode the json and create the socket
         message = str.encode(str(json.dumps(js)))
@@ -203,7 +203,7 @@ class PyNaClient(object):
                 total_sent = total_sent + sent
         except Exception as msg:
             if js['type'] != 'connection':
-                color_print('{2}... mesh-chat application does not appear to exist at {0}:{1}'.format(address,port,js['type']),color.warn)
+                self.color_print('{2}... mesh-chat application does not appear to exist at {0}:{1}'.format(address,port,js['type']),self.color.warn)
                 self.deactivate_server(target)
             return
         # everything went according to plan, close the socket and activate the server
