@@ -1,7 +1,7 @@
 import json
 from packager import Packager
 
-class Configuration(object):
+class ServerManager(object):
 	def __init__(self, alias, address, port):
 		self.alias = alias
 		self.active_server_list = []

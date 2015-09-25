@@ -2,11 +2,11 @@ import json, sys
 from packager import Packager
 
 class InputHandler(object):
-	def __init__(self,sender,display,packager,configuration):
+	def __init__(self,sender,display,servermanager):
 		self.sender = sender
 		self.display = display
-		self.packager = packager
-		self.configuration = configuration
+		self.configuration = servermanager
+		self.packager = servermanager.create_packager()
 
 	# determines what to do with the string from wait_for_input
 	def process(self,message):
