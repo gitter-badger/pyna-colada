@@ -1,47 +1,67 @@
 import json, socket, time, sys
-from pynaEntity import PynaEntity
+from core.socketlistener import SocketListener
+from core.display import Display
 
 # Main server clas
-class SocketListener(PynaEntity):
-    def __init__(self, address, port):
-        self.address = address
-        self.port = port
+class PyNaServer(SocketListener):
+    def __init__(self, client, address, port):
+        super().__init__(address,port)
+        self.authorized_server_list = []
+        self.client = client
+        self.server_config = json.load(open('config/config.json','r'))
+        Display.log('Welcome to \033[1mPyÑa Colada' + Display.color.end + Display.color.pyna_colada +' Server v{0}'.format(self.server_config['serverVersion']))
+        self.client.version = self.server_config['clientVersion']
+        self.client.uid = self.server_config['uid']
+        self.load_in_servers()
 
-    def create_socket(self):
-        # Create a socket
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # Try to bind the socket
-        try:
-            self.sock.bind((self.address, self.port))
-        except socket.error as msg:
-            # No dice. Kill the process.
-            error('ERROR: Unable to bind socket: {0}'.format(msg))
-            return
-        # We have a working socket, set it up and inform the user
-        self.sock.listen(1)
-        self.client.sock = self.sock
-
-    # Create a socket then log everything that we receive
+    # Same as super(), but includes notification and then tells the client to ping
     def __running__(self):
-        self.create_socket()
+        super().create_socket()
+
+        # Ask the client to ping all servers, then notify the user that we're running
+        if self.sock != None:
+            self.client.ping_all(self.authorized_server_list)
+            Display.log('Server running on {0}:{1}\n'.format(self.address,self.port))
+
+        # listen on the socket while we have a bound socket
         while self.sock is not None:
-            msg = self.receive_from_socket()
-            self.log(msg)
+            protocol_msg = self.receive_from_socket()
+            self.interpret_message(protocol_msg)
             time.sleep(1)
 
-    # receive a message on our socket
-    def receive_from_socket(self):
-        connection, address = self.sock.accept()
-        response = connection.recv(1024)
-        return json.loads(response.decode("utf-8"))
+    # Handles receipt of the actual json we take in
+    def interpret_message(self,msg):
 
-    # Logging methods
-    def log(self, message):
-        self.color_print(message,self.color.green)
-    def debug(self, message):
-        self.color_print(message,self.color.dark_gray)
-    def warn(self, message):
-        self.color_print(message,self.color.warn)
-    def error(self, message):
-        self.color_print(message,self.color.fail)
+        # add this server to our list since we know it's real
+        self.connect(msg['sender'])
+
+        # Determine what needs to be done according to the message type
+        if (msg['type'] == 'chat' or msg['type'] == 'whisper'):
+            self.client.display_message(msg)
+        if msg['type'] == 'disconnection':
+            self.client.disconnect_notify(msg['sender'])
+        if msg['type'] == 'ping':
+            self.client.send_type_to_location('pingreply',msg['sender']['location'])
+
+    # For new connections
+    def connect(self, sender):
+        # tell the client to try to activate the server
+        self.client.activate_server(sender['location'],sender['name'])
+        # Check to see if it is in our authorized_server_list, add it if not
+        if sender['location'] not in self.authorized_server_list:
+            self.authorized_server_list.append(sender['location'])
+            # Update our servers.json with the new server info
+            data = json.load(open('config/servers.json','r'))
+            data.update({"servers":self.authorized_server_list})
+            with open('config/servers.json','w') as auth:
+                json.dump(data, auth)
+
+    # Load the servers in out servers.json file into authorized_server_list
+    def load_in_servers(self):
+        # open the json
+        with open('config/servers.json','r') as auth:
+            data = json.load(auth)
+        # add those which are not already in our authorized_server_list
+        for server in data['servers']:
+            if server not in self.authorized_server_list:
+                self.authorized_server_list.append(server)
