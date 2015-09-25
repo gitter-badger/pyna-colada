@@ -27,4 +27,4 @@ class ServerManager(object):
 				self.authorized_server_list.append(server)
 
 	def create_packager(self):
-		return Packager(self.version,self.alias,self.location,self.uid)
+		return Packager(self.version,{"name": self.alias, "location": self.location, "uid": self.uid})

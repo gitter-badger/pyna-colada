@@ -8,18 +8,19 @@ class Interpreter(object):
 
 	# Handles receipt of the actual json we take in
 	def interpret_message(self,msg):
+		sender_location = msg['sender']['location']
 		# add this server to our list since we know it's real
 		self.connect(msg['sender'])
 		# Determine what needs to be done according to the message type
 		if msg['type'] == 'ping':
-			self.inputhandler.send_type_to_location('pingreply',msg['sender']['location'])
+			self.inputhandler.send_type_to_location('pingreply',sender_location)
 			return
 		if msg['type'] == 'disconnection':
-			self.inputhandler.deactivate_server(msg['sender']['location'])
-			self.display.disconnected(msg['sender']['name'],msg['sender']['location'])
+			self.inputhandler.deactivate_server(sender_location)
+			self.display.disconnected(msg['sender']['name'],sender_location)
 			return
 		if msg['type'] == 'connection':
-			self.inputhandler.send_type_to_location('serverlisthash',msg['sender']['location'])
+			self.inputhandler.send_type_to_location('serverlisthash',sender_location)
 			return
 		if msg['type'] == 'whisper':
 			self.manager.most_recent_whisperer = msg['sender']['name']
