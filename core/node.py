@@ -1,12 +1,12 @@
 import threading, time, json
-from listener import Listener
-from sender import Sender
-from display import Display
-from packager import Packager
-from interpreter import Interpreter
-from inputhandler import InputHandler
-from cli import CommandLineInterface
-from servermanager import ServerManager
+from core.listener import Listener
+from core.sender import Sender
+from core.display import Display
+from core.packager import Packager
+from core.interpreter import Interpreter
+from core.inputhandler import InputHandler
+from core.cli import CommandLineInterface
+from core.servermanager import ServerManager
 
 class Node(object):
 	def __init__(self,alias,address,port):

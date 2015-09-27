@@ -1,7 +1,5 @@
 import json, socket, time, sys
 from core.socketlistener import SocketListener
-from display import Display
-from packager import Packager
 
 # Main server clas
 class Listener(SocketListener):

@@ -1,6 +1,5 @@
 import json, socket, sys
-from display import Display
-from packager import Packager
+from core.display import Display
 
 # Main client class
 class Sender(object):
@@ -33,7 +32,7 @@ class Sender(object):
                     raise RuntimeError('Connection closed erroneously')
                 total_sent = total_sent + sent
         except Exception as msg:
-            #self.display.warn('ERROR: \n')
+            #self.display.warn('ERROR: {0}\n'.format(msg))
             return False
         # everything went according to plan, close the socket and activate the server
         self.sock.close()

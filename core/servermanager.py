@@ -1,5 +1,5 @@
 import json
-from packager import Packager
+from core.packager import Packager
 
 class ServerManager(object):
 	def __init__(self, alias, address, port):

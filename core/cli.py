@@ -1,4 +1,4 @@
-from inputhandler import InputHandler
+from core.inputhandler import InputHandler
 
 class CommandLineInterface(object):
 	def __init__(self,inputhandler):

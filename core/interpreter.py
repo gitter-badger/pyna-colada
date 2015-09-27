@@ -32,7 +32,7 @@ class Interpreter(object):
 
 	def log_message(self,msg):
 		if self.manager.logger != "":
-			self.inputhandler.send_text_message('Received {0} request from {1}'.format(msg['type'],msg['sender']),self.manager.logger)
+			self.inputhandler.send_text_message('Received {0} from {1}@{2}'.format(msg['type'],msg['sender']['name'],msg['sender']['location']),self.manager.logger)
 
 	# For new connections
 	def connect(self, sender):

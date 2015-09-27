@@ -1,5 +1,5 @@
 import json, sys
-from packager import Packager
+from core.packager import Packager
 
 class InputHandler(object):
 	def __init__(self,sender,display,servermanager):
@@ -16,7 +16,7 @@ class InputHandler(object):
 		# User wants to connect to a specific ip:port pair
 		if '/con ' in message[:5]:
 			connection_message = self.packager.pack('connection')
-			self.send_message(connection_message,message[3:])
+			self.send_message(connection_message,message[5:])
 			return
 		# User wants to whisper to an alias (if it exists)
 		if '/w ' in message[:3]:

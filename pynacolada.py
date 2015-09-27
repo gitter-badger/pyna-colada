@@ -1,5 +1,5 @@
 import socket, sys
-from node import Node
+from core.node import Node
 
 # Get the local ip address
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
