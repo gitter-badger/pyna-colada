@@ -14,6 +14,9 @@ class ServerManager(object):
 		self.version = server_config['version']
 		self.uid = server_config['uid']
 		self.load_in_servers(self.location)
+		self.logger = server_config['logger']
+		if self.location == self.logger:
+			self.logger = ""
 
 	# Load the servers in out servers.json file into authorized_server_list
 	def load_in_servers(self,location):

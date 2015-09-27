@@ -14,7 +14,7 @@ class InputHandler(object):
 			return
 
 		# User wants to connect to a specific ip:port pair
-		if '/c ' in message[:3]:
+		if '/con ' in message[:5]:
 			connection_message = self.packager.pack('connection')
 			self.send_message(connection_message,message[3:])
 			return
@@ -39,7 +39,7 @@ class InputHandler(object):
 			self.send_message(whisper_message,whisper_to_location)
 			return
 		# User wants to disconnect this node
-		if '/x' in message[:2]:
+		if '/exit' in message[:5]:
 			self.display.server_announce('Closing down server. Thank you for using PyÑa Colada!')
 			close_message = self.packager.pack('disconnection')
 			self.send_to_all(close_message)
@@ -93,6 +93,9 @@ class InputHandler(object):
 		packed_json = self.packager.pack('chat',message)
 		self.send_to_all(packed_json)
 
+	def send_text_message(self,message,target):
+		self.send_message(self.packager.pack('chat',message),target)
+
 	def send_message(self,message,target):
 		if self.sender.try_to_send(target, message):
 			self.activate_server(target)
@@ -104,7 +107,6 @@ class InputHandler(object):
 	def ping_all(self):
 		ping_json = self.packager.pack('ping')
 		for address in self.configuration.authorized_server_list:
-			self.display.log('Pinging ' + address)
 			self.sender.try_to_send(address,ping_json)
 
 	# not sure if the user typed in a location or alias, so try to get a location

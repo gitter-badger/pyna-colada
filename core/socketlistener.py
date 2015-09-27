@@ -16,7 +16,7 @@ class SocketListener(object):
             self.sock.bind((self.address, self.port))
         except socket.error as msg:
             # No dice. Kill the process.
-            Display.error('ERROR: Unable to bind socket: {0}'.format(msg))
+            print('ERROR: Unable to bind socket: {0}'.format(msg))
             return
         # We have a working socket, set it up and inform the user
         self.sock.listen(1)

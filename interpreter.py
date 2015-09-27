@@ -24,14 +24,15 @@ class Interpreter(object):
 			return
 		if msg['type'] == 'whisper':
 			self.manager.most_recent_whisperer = msg['sender']['name']
-		self.message_notify(msg)
+		self.log_message(msg)
 		self.display.display(msg)
 
 	def ping_all(self):
 		self.inputhandler.ping_all()
 
-	def message_notify(self,msg):
-		self.display.info('Received {0} request from {1}'.format(msg['type'],msg['sender']))
+	def log_message(self,msg):
+		if self.manager.logger != "":
+			self.inputhandler.send_text_message('Received {0} request from {1}'.format(msg['type'],msg['sender']),self.manager.logger)
 
 	# For new connections
 	def connect(self, sender):
