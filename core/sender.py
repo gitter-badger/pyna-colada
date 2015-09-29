@@ -9,7 +9,7 @@ class Sender(object):
         self.display = display
 
     # Try to send over socket
-    def try_to_send(self, target, js):
+    def try_to_send(self, js,target):
         try:
             address, port = target.split(':')
         except ValueError:
