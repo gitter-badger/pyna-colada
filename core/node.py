@@ -6,14 +6,14 @@ from core.packager import Packager
 from core.interpreter import Interpreter
 from core.relay import Relay
 from core.cli import CommandLineInterface
-from core.servermanager import ServerManager
+from core.manager import Manager
 from core.processor import Processor
 
 class Node(object):
 	def __init__(self,alias,address,port):
 		self.address = address
 		self.port = port
-		self.servermanager = ServerManager(alias,address,port)
+		self.manager = Manager(alias,address,port)
 		# Build the client
 		self.start()
 
@@ -24,7 +24,7 @@ class Node(object):
 		self.start_up_listener()
 
 		# information
-		self.display.pyna_colada(self.servermanager.version)
+		self.display.pyna_colada(self.manager.version)
 		self.display.log('Node running on {0}:{1}\n'.format(self.address,self.port))
 		self.processor.ping_all()
 
@@ -36,9 +36,9 @@ class Node(object):
 	def initialize_components(self):
 		self.display = Display()
 		self.sender = Sender(self.display)
-		self.relay = Relay(self.sender,self.display,self.servermanager)
-		self.processor = Processor(self.relay,self.display, self.servermanager)
-		self.interpreter = Interpreter(self.processor,self.display,self.servermanager)
+		self.relay = Relay(self.sender,self.display,self.manager)
+		self.processor = Processor(self.relay,self.display, self.manager)
+		self.interpreter = Interpreter(self.processor,self.display,self.manager)
 		self.interpreter.display = self.display
 		self.cli = CommandLineInterface(self.processor,self.display)
 

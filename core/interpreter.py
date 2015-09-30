@@ -1,9 +1,9 @@
 import json
 
 class Interpreter(object):
-	def __init__(self, processor, display, servermanager):
+	def __init__(self, processor, display, manager):
 		self.display = display
-		self.manager = servermanager
+		self.manager = manager
 		self.processor = processor
 
 	# Handles receipt of the actual json we take in
@@ -13,14 +13,14 @@ class Interpreter(object):
 		self.check_node_status(msg['sender'])
 		# Determine what needs to be done according to the message type
 		if msg['type'] == 'ping':
-			self.processor.pingreply(sender_location)
+			self.processor.send("pingReply",sender_location)
 			return
 		if msg['type'] == 'disconnection':
 			self.manager.deactivate_node(msg['sender'])
 			self.display.disconnected(msg['sender']['alias'],sender_location)
 			return
 		if msg['type'] == 'connection':
-			self.processor.serverlisthash(sender_location)
+			self.processor.node_list_hash(sender_location)
 			return
 		if msg['type'] == 'nodeListHash':
 			if not self.manager.hash_is_identical(msg['message']):

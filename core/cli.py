@@ -18,7 +18,7 @@ class CommandLineInterface(object):
 
 		# User wants to connect to a specific ip:port pair
 		if '/con ' in message[:5]:
-			self.processor.connection(message[5:])
+			self.processor.send('connection',message[5:])
 			return
 		# User wants to whisper to an alias (if it exists)
 		if '/w ' in message[:3]:
@@ -36,11 +36,11 @@ class CommandLineInterface(object):
 			return
 		# User wants to ping its active serverlist
 		if '/pingall' in message[:8]:
-			self.processor.ping_all()
+			self.processor.broadcast('ping')
 			return
 		# User wants a ping update from only a specific node
 		if '/ping ' in message[:6]:
-			self.processor.ping(message[6:])
+			self.processor.send('ping',message[6:])
 			return
 		# User wants to know more information about an alias or ipaddress
 		if '/? ' in message[:3]:
@@ -57,7 +57,7 @@ class CommandLineInterface(object):
 			return
 
 		# default: send a chat message
-		self.processor.chat(message)
+		self.processor.broadcast('chat',message)
 
 	def split_target_and_message(self,message):
 		if len(message) > 0:

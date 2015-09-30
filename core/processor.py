@@ -1,7 +1,7 @@
 import sys
 from core.relay import Relay
 from core.display import Display
-from core.servermanager import ServerManager
+from core.manager import Manager
 
 class Processor(object):
 	def __init__(self, relay, display, manager):
@@ -15,7 +15,7 @@ class Processor(object):
 		self.display.info('A mesh-chat type application written by Evan Kirsch (2015)\n')
 
 	def exit(self):
-		self.display.server_announce('Closing down server. Thank you for using PyÑa Colada!')
+		self.display.server_announce('Closing down node. Thank you for using PyÑa Colada!')
 		close_message = self.packager.pack('disconnection')
 		self.relay.send_to_all(close_message)
 		sys.exit(0)
@@ -25,12 +25,7 @@ class Processor(object):
 		self.relay.send_message(whisper_message,target)
 
 	def reply(self, message):
-		whisper_message = self.packager.pack('whisper',message)
-		self.relay.send_message(whisper_message,self.manager.most_recent_whisperer)
-
-	def connection(self,target):
-		connection_message = self.packager.pack('connection')
-		self.relay.send_message(connection_message,target)
+		self.whisper(message,self.manager.most_recent_whisperer)
 
 	def identity(self,key):
 		# if this is an alias
@@ -38,7 +33,7 @@ class Processor(object):
 		if user is None:
 			self.display.info('No user or node was found with key \'{0}\''.format(key))
 		else:
-			self.display.info('User {0} ({1}) at {2}'.format(user['alias'],user['uid'],user['address']))
+			self.info(user)
 
 	def who(self):
 		if len(self.manager.active_nodes) == 0:
@@ -46,32 +41,31 @@ class Processor(object):
 			return
 		self.display.log('Active users')
 		for node in self.manager.active_nodes:
-			self.display.info("{2}:  {0} ({1})".format(node['alias'],node['uid'],node['address']))
+			self.info(node)
 
-	def chat(self,message):
-		self.relay.send_to_all(self.packager.pack('chat',message))
+	def info(self,node):
+		self.display.info("{2}:  {0} ({1})".format(node['alias'],node['uid'],node['address']))
 
-	def serverlisthash(self,target):
+	def node_list_hash(self,target):
 		hashed = self.manager.get_node_hash()
 		packed_json = self.packager.pack('nodeListHash',hashed)
 		self.relay.send_message(packed_json,target)
 
 	def full_node_list(self,target):
 		node_list = self.manager.get_node_list()
-		packed_json = self.packager.pack('nodeListFull',node_list)
-		self.relay.send_message(packed_json,target)
+		self.send('nodeListFull',target,node_list)
 
 	def node_list_diff(self,node_list,target):
-		packed_json = self.packager.pack('nodeListDiff',node_list)
-		self.relay.send_message(packed_json,target)
+		self.send('nodeListDiff',target,node_list)
 
-	def ping(self, location):
-		ping_json = self.packager.pack('ping')
-		self.relay.send_message(ping_json,location)
+	def send(self,type,target,content=''):
+		packaged_json = self.packager.pack(type,content)
+		self.relay.send_message(packaged_json,target)
 
-	def pingreply(self, location):
-		ping_json = self.packager.pack('pingreply')
-		self.relay.send_message(ping_json,location)
+	def broadcast(self,type,content=''):
+		packaged_json = self.packager.pack(type,content)
+		self.relay.send_to_all(packaged_json)
+
 
 	# Called by server to see which authorized servers are active
 	def ping_all(self):
