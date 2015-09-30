@@ -18,5 +18,5 @@ class Relay(object):
 	# Send JSON to all active servers
 	def send_to_all(self,json):
 		for active_server in self.manager.active_nodes:
-			address = self.manager.get_location(active_server['location'])
+			address = self.manager.get_location(active_server['address'])
 			self.send_message(json,address)

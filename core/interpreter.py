@@ -8,7 +8,7 @@ class Interpreter(object):
 
 	# Handles receipt of the actual json we take in
 	def interpret_message(self,msg):
-		sender_location = msg['sender']['location']
+		sender_location = msg['sender']['address']
 		# add this server to our list since we know it's real
 		self.check_node_status(msg['sender'])
 		# Determine what needs to be done according to the message type
@@ -17,13 +17,13 @@ class Interpreter(object):
 			return
 		if msg['type'] == 'disconnection':
 			self.manager.deactivate_node(msg['sender'])
-			self.display.disconnected(msg['sender']['name'],sender_location)
+			self.display.disconnected(msg['sender']['alias'],sender_location)
 			return
 		if msg['type'] == 'connection':
 			self.processor.serverlisthash(sender_location)
 			return
 		if msg['type'] == 'whisper':
-			self.manager.most_recent_whisperer = msg['sender']['name']
+			self.manager.most_recent_whisperer = msg['sender']['alias']
 		self.log_message(msg)
 		self.display.display(msg)
 
@@ -38,8 +38,8 @@ class Interpreter(object):
 	# For new connections
 	def check_node_status(self, sender):
 		# tell the client to try to activate the server
-		location = sender['location']
-		alias = sender['name']
+		location = sender['address']
+		alias = sender['alias']
 
 		# Check to see if it is in our authorized_server_list, add it if not
 		#if self.manager.authorize(sender):

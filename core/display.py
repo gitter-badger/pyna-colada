@@ -16,7 +16,7 @@ class Display(object):
 
 	# display a message received according to type
 	def display(self,msg):
-		sender_tag = msg['sender']['name']
+		sender_tag = msg['sender']['alias']
 		message = msg['message']
 		sent_at = msg['time_sent']
 		# If this is a whisper, format as blue

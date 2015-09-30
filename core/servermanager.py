@@ -5,16 +5,16 @@ class ServerManager(object):
 	def __init__(self, alias, address, port):
 		self.alias = alias
 		self.active_nodes = []
-		self.location = '{0}:{1}'.format(address,port)
+		self.address = '{0}:{1}'.format(address,port)
 		self.load()
 
 	def load(self):
 		server_config = json.load(open('config/config.json','r'))
 		self.version = server_config['version']
 		self.uid = server_config['uid']
-		self.load_in_servers(self.location)
+		self.load_in_servers(self.address)
 		self.logger = server_config['logger']
-		if self.location == self.logger:
+		if self.address == self.logger:
 			self.logger = ""
 
 	# Load the servers in out servers.json file into authorized_server_list
@@ -29,16 +29,16 @@ class ServerManager(object):
 				self.authorized_nodes.append(server)
 
 	def create_packager(self):
-		return Packager(self.version,{"name": self.alias, "location": self.location, "uid": self.uid, "publickey": self.alias})
+		return Packager(self.version,{"alias": self.alias, "address": self.address, "uid": self.uid, "publicKey": self.alias})
 
 	# not sure if the user typed in a location or alias, so try to get a location
 	def get_location(self,key):
 		# if key is an alias
 		node = self.find_in_active(key,key,key,key)
 		if node is not None:
-			return node['location']
+			return node['address']
 		if type(key) is dict:
-			return key['location']
+			return key['address']
 		return key
 
 	# Try to add the alias/location to active servers and active aliases
@@ -50,7 +50,7 @@ class ServerManager(object):
 
 	def find_in_active(self, alias="", address="", uid="", publickey=""):
 		for node in self.active_nodes:
-			if node['name'] == alias or node['location'] == address or node['uid'] == uid or node['publickey'] == publickey:
+			if node['alias'] == alias or node['address'] == address or node['uid'] == uid or node['publicKey'] == publickey:
 				return node
 		return None
 
