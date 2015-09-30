@@ -1,4 +1,8 @@
 class Display(object):
+	def __init__(self,debug=False):
+		self.debug_mode = debug
+
+
 	class color:
 		header = '\033[96m'
 		blue = '\033[94m'
@@ -40,7 +44,8 @@ class Display(object):
 	def log(self, message):
 		self.color_print(message,self.color.green)
 	def debug(self, message):
-		self.color_print(message,self.color.dark_gray)
+		if self.debug_mode:
+			self.color_print(message,self.color.blue)
 	def warn(self, message):
 		self.color_print(message,self.color.warn)
 	def error(self, message):

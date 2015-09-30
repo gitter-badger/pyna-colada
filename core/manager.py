@@ -44,6 +44,8 @@ class Manager(object):
 
 	# Try to add the alias/location to active nodes and active aliases
 	def activate_node(self, sender):
+		if sender not in self.authorized_nodes:
+			self.authorize(sender)
 		if (sender not in self.active_nodes and sender['address'] != self.address):
 			self.active_nodes.append(sender)
 			return True

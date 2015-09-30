@@ -26,7 +26,7 @@ class Node(object):
 		# information
 		self.display.pyna_colada(self.manager.version)
 		self.display.log('Node running on {0}:{1}\n'.format(self.address,self.port))
-		self.processor.ping_all()
+		self.processor.broadcast('connection',targets=self.manager.authorized_nodes)
 
 		# Await initialization before starting client thread
 		time.sleep(1)
@@ -34,7 +34,7 @@ class Node(object):
 		sender_thread.start()
 
 	def initialize_components(self):
-		self.display = Display()
+		self.display = Display(True)
 		self.sender = Sender(self.display)
 		self.relay = Relay(self.sender,self.display,self.manager)
 		self.processor = Processor(self.relay,self.display, self.manager)
@@ -43,7 +43,7 @@ class Node(object):
 		self.cli = CommandLineInterface(self.processor,self.display)
 
 	def start_up_listener(self):
-		self.listener = Listener(self.interpreter,self.address,int(self.port))
+		self.listener = Listener(self.interpreter,self.address,int(self.port),True)
 		self.listener.display = self.display
 		# thread
 		listener_thread = threading.Thread(target=self.listener.__running__)

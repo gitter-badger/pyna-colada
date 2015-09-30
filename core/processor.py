@@ -16,8 +16,7 @@ class Processor(object):
 
 	def exit(self):
 		self.display.server_announce('Closing down node. Thank you for using PyÑa Colada!')
-		close_message = self.packager.pack('disconnection')
-		self.relay.send_to_all(close_message)
+		self.broadcast('disconnection')
 		sys.exit(0)
 
 	def whisper(self, message, target):
@@ -62,13 +61,8 @@ class Processor(object):
 		packaged_json = self.packager.pack(type,content)
 		self.relay.send_message(packaged_json,target)
 
-	def broadcast(self,type,content=''):
+	def broadcast(self,type,content='',targets=None):
+		if targets is None:
+			targets = self.manager.active_nodes
 		packaged_json = self.packager.pack(type,content)
-		self.relay.send_to_all(packaged_json)
-
-
-	# Called by server to see which authorized servers are active
-	def ping_all(self):
-		ping_json = self.packager.pack('ping')
-		for location in self.manager.authorized_nodes:
-			self.relay.send_message(ping_json,location)
+		self.relay.send_to_all(packaged_json,targets)

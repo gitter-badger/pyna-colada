@@ -1,1 +1,1 @@
-{"nodes": []}
+{"nodes": [{"address": "192.168.40.139:2008", "publicKey": "neurotek", "alias": "neurotek", "uid": "BeepBoopIAmARobot"}, {"address": "192.168.40.139:8080", "publicKey": "etk", "alias": "etk", "uid": "BeepBoopIAmARobot"}, {"address": "192.168.40.139:2008", "publicKey": "test", "alias": "test", "uid": "BeepBoopIAmARobot"}, {"address": "192.168.40.139:8080", "publicKey": "neurotek", "uid": "BeepBoopIAmARobot", "alias": "neurotek"}]}

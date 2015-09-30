@@ -1,11 +1,11 @@
 import json, socket, time, sys
-from core.display import Display
 
 # Main server clas
 class SocketListener(object):
-    def __init__(self, address, port):
+    def __init__(self, address, port, debug=False):
         self.address = address
         self.port = port
+        self.debug = debug
 
     def create_socket(self):
         # Create a socket
@@ -40,4 +40,5 @@ class SocketListener(object):
             sent = json.loads(response.decode("utf-8"))
             self.interpret_message(sent)
         except Exception as msg:
-            pass#print('Malformed message received')
+            if self.debug:
+                print('Error on Listener Thread: {0}'.format(msg))

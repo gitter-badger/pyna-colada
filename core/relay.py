@@ -14,12 +14,14 @@ class Relay(object):
 			return
 		if self.sender.try_to_send(message,address):
 			return
-		if (message['type'] != 'connection' and target is not None):
+		if ('connection' not in message['type'] and target is not None):
 			self.display.warn('mesh-chat application does not appear to exist at {0}'.format(address))
 			self.manager.deactivate_node(address)
 
 	# Send JSON to all active servers
-	def send_to_all(self,json):
-		for active_server in self.manager.active_nodes:
-			address = self.manager.get_location(active_server['address'])
+	def send_to_all(self,json,target_nodes):
+		for node in target_nodes:
+			address = self.manager.get_location(node['address'])
+			if address == self.manager.address:
+				continue
 			self.send_message(json,address)

@@ -1,9 +1,11 @@
+#import readline
 from core.processor import Processor
 
 class CommandLineInterface(object):
 	def __init__(self,processor,display):
 		self.processor = processor
 		self.display = display
+#		readline.parse_and_bind('tab: complete')
 
 	# Waits for input from the user, then sends it off to be handled
 	def __running__(self):

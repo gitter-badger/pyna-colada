@@ -13,10 +13,10 @@ class Sender(object):
         try:
             address, port = target.split(':')
         except ValueError as msg:
-            self.display.warn('ERROR: No user was found')
+            self.display.warn(msg)
             return False
         except AttributeError:
-            self.display.warn('ERROR: No user was found at {0}'.format(target))
+            self.display.debug('ERROR: No user was found at {0}'.format(target))
         # encode the json and create the socket
         message = str.encode(str(json.dumps(js)))
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,7 +32,7 @@ class Sender(object):
                     raise RuntimeError('Connection closed erroneously')
                 total_sent = total_sent + sent
         except Exception as msg:
-            #self.display.warn('ERROR: {0}\n'.format(msg))
+            self.display.debug('ERROR: {0}\n'.format(msg))
             return False
         # everything went according to plan, close the socket and activate the server
         self.sock.close()
