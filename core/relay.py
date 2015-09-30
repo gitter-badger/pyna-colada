@@ -9,9 +9,12 @@ class Relay(object):
 
 	def send_message(self,message,target):
 		address = self.manager.get_location(target)
+		if address is None:
+			self.display.warn('No user was found at {0}'.format(target))
+			return
 		if self.sender.try_to_send(message,address):
 			return
-		if message['type'] != 'connection':
+		if (message['type'] != 'connection' and target is not None):
 			self.display.warn('mesh-chat application does not appear to exist at {0}'.format(address))
 			self.manager.deactivate_node(address)
 

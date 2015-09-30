@@ -25,8 +25,7 @@ class SocketListener(object):
     def __running__(self):
         self.create_socket()
         while self.sock is not None:
-            msg = self.receive_from_socket()
-            self.interpret_message(msg)
+            self.receive_from_socket()
             time.sleep(1)
 
     # do something with the message we have received
@@ -37,4 +36,8 @@ class SocketListener(object):
     def receive_from_socket(self):
         connection, address = self.sock.accept()
         response = connection.recv(1024)
-        return json.loads(response.decode("utf-8"))
+        try:
+            sent = json.loads(response.decode("utf-8"))
+            self.interpret_message(sent)
+        except Exception as msg:
+            pass#print('Malformed message received')

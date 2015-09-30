@@ -23,8 +23,8 @@ class CommandLineInterface(object):
 		# User wants to whisper to an alias (if it exists)
 		if '/w ' in message[:3]:
 			target, whisper = self.split_target_and_message(message[3:])
-			print(target)
-			self.processor.whisper(whisper,target)
+			if target is not "":
+				self.processor.whisper(whisper,target)
 			return
 		# User wants to reply to the most recent whisperer (if it exists)
 		if '/r ' in message[:3]:
@@ -66,5 +66,6 @@ class CommandLineInterface(object):
 				return message[:index_of_space], message[index_of_space+1:]
 			except:
 				self.display.warn('Cannot send a whisper without a message.')
+				return "",""
 		self.display.warn('Improper target or message format.')
 		return "",""

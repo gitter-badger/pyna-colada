@@ -12,11 +12,11 @@ class Sender(object):
     def try_to_send(self, js,target):
         try:
             address, port = target.split(':')
-        except ValueError:
-            self.display.warn('ERROR: Port was not specified {0}\n'.format(target))
+        except ValueError as msg:
+            self.display.warn('ERROR: No user was found')
             return False
         except AttributeError:
-            self.display.warn('ERROR: No user was found at this port')
+            self.display.warn('ERROR: No user was found at {0}'.format(target))
         # encode the json and create the socket
         message = str.encode(str(json.dumps(js)))
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

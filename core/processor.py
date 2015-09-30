@@ -2,7 +2,6 @@ import sys
 from core.relay import Relay
 from core.display import Display
 from core.servermanager import ServerManager
-from operator import itemgetter
 
 class Processor(object):
 	def __init__(self, relay, display, manager):
@@ -39,7 +38,7 @@ class Processor(object):
 		if user is None:
 			self.display.info('No user or node was found with key \'{0}\''.format(key))
 		else:
-			self.display.info('User {0} ({1}) at {2}'.format(user['name'],user['uid'],user['location']))
+			self.display.info('User {0} ({1}) at {2}'.format(user['alias'],user['uid'],user['address']))
 
 	def who(self):
 		if len(self.manager.active_nodes) == 0:
@@ -47,13 +46,23 @@ class Processor(object):
 			return
 		self.display.log('Active users')
 		for node in self.manager.active_nodes:
-			self.display.info("{2}:  {0} ({1})".format(node['name'],node['uid'],node['location']))
+			self.display.info("{2}:  {0} ({1})".format(node['alias'],node['uid'],node['address']))
 
 	def chat(self,message):
 		self.relay.send_to_all(self.packager.pack('chat',message))
 
 	def serverlisthash(self,target):
-		packed_json = self.packager.pack('serverlisthash')
+		hashed = self.manager.get_node_hash()
+		packed_json = self.packager.pack('nodeListHash',hashed)
+		self.relay.send_message(packed_json,target)
+
+	def full_node_list(self,target):
+		node_list = self.manager.get_node_list()
+		packed_json = self.packager.pack('nodeListFull',node_list)
+		self.relay.send_message(packed_json,target)
+
+	def node_list_diff(self,node_list,target):
+		packed_json = self.packager.pack('nodeListDiff',node_list)
 		self.relay.send_message(packed_json,target)
 
 	def ping(self, location):

@@ -22,13 +22,21 @@ class Interpreter(object):
 		if msg['type'] == 'connection':
 			self.processor.serverlisthash(sender_location)
 			return
+		if msg['type'] == 'nodeListHash':
+			if not self.manager.hash_is_identical(msg['message']):
+				self.processor.full_node_list(sender_location)
+			return
+		if msg['type'] == 'nodeListFull':
+			diffed_nodes = self.manager.diff_node_list(msg['message'])
+			self.processor.node_list_diff(diffed_nodes,sender_location)
+			return
+		if msg['type'] == 'nodeListDiff':
+			diffed_nodes = self.manager.add_nodes(msg['message'])
+			return
 		if msg['type'] == 'whisper':
 			self.manager.most_recent_whisperer = msg['sender']['alias']
 		self.log_message(msg)
 		self.display.display(msg)
-
-	def ping_all(self):
-		self.inputhandler.ping_all()
 
 	def log_message(self,msg):
 		pass
