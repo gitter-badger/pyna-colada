@@ -8,9 +8,9 @@ class Interpreter(object):
 
 	# Handles receipt of the actual json we take in
 	def interpret_message(self,msg):
-		sender = msg['sender']
-		self.display.debug("DBG: {0} received from {1}".format(msg['type'],sender['address']))
+		'''Figure out what to do with a received message'''
 		# add this server to our list since we know it's real
+		sender = msg['sender']
 		self.check_node_status(sender)
 		# Determine what needs to be done according to the message type
 		if msg['type'] == 'ping':

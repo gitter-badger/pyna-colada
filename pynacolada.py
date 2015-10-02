@@ -21,3 +21,5 @@ else:
         port = 8080
 
 node = Node(alias,address,port)
+
+node.start()

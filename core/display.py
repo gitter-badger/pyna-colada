@@ -1,9 +1,12 @@
 class Display(object):
+	'''Anything which displays to the user should go through Display()'''
+
 	def __init__(self,debug=False):
 		self.debug_mode = debug
 
 
 	class color:
+		'''Collection of colors for color_print'''
 		header = '\033[96m'
 		blue = '\033[94m'
 		green = '\033[92m'
@@ -16,31 +19,36 @@ class Display(object):
 		bold = '\033[1m'
 
 	def color_print(self,message,printed_color):
+		'''Formats a message with a specific color (as Display.color)'''
 		print(printed_color + message + self.color.end)
 
-	# display a message received according to type
 	def display(self,msg):
+		'''Display a message received according to the type'''
+		# Scrape out info
 		sender_tag = msg['sender']['alias']
 		message = msg['message']
 		sent_at = msg['time_sent']
 		# If this is a whisper, format as blue
 		if msg['type'] == 'whisper':
 			self.whisper(sender_tag,message)
+		# otherwise, if chat, format normally
 		if msg['type'] == 'chat':
 			self.chat(sender_tag,message)
 
 	def chat(self, sender_tag,message, chat_color=color.gray):
+		'''Display a message with formatting for chat; can be formatted with a specific color if desired'''
 		sender_tag = self.bold(sender_tag,chat_color)
 		self.color_print("{0}: {1}".format(sender_tag, message),chat_color)
 
 	def whisper(self, sender_tag,message):
+		'''Display a chat message in clue with the <W> tag attached'''
 		sender_tag = sender_tag + ' <W>'
 		self.chat(sender_tag,message,Display.color.blue)
 
 	def disconnected(self, alias, location):
+		'''Inform the user that someone has disconnected'''
 		self.info('{0} ({1}) has disconnected'.format(alias,location))
 
-	# Logging methods
 	def log(self, message):
 		self.color_print(message,self.color.green)
 	def debug(self, message):

@@ -10,12 +10,12 @@ from core.manager import Manager
 from core.processor import Processor
 
 class Node(object):
+	'''Overseer. This initializes and handles threads for Pyna Colada'''
+
 	def __init__(self,alias,address,port):
 		self.address = address
 		self.port = port
 		self.manager = Manager(alias,address,port)
-		# Build the client
-		self.start()
 
 	def start(self):
 		self.initialize_components()
@@ -34,7 +34,7 @@ class Node(object):
 		sender_thread.start()
 
 	def initialize_components(self):
-		self.display = Display(True)
+		self.display = Display()
 		self.sender = Sender(self.display)
 		self.relay = Relay(self.sender,self.display,self.manager)
 		self.processor = Processor(self.relay,self.display, self.manager)
@@ -43,7 +43,7 @@ class Node(object):
 		self.cli = CommandLineInterface(self.processor,self.display)
 
 	def start_up_listener(self):
-		self.listener = Listener(self.interpreter,self.address,int(self.port),True)
+		self.listener = Listener(self.interpreter,self.address,int(self.port))
 		self.listener.display = self.display
 		# thread
 		listener_thread = threading.Thread(target=self.listener.__running__)
