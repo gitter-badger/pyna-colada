@@ -34,6 +34,15 @@ class Processor(object):
 		else:
 			self.info(user)
 
+	def help(self):
+		self.display.info('/w <Target> sends a whisper private message to an address, alias, or uid')
+		self.display.info('/r sends a whisper to the most recent whisperer')
+		self.display.info('/who displays information about all active nodes')
+		self.display.info('/con <Target> connects to a target')
+		self.display.info('/ping <Target> pings a target')
+		self.display.info('/pingall pings all authorized nodes')
+		self.display.info('/exit closes this node')
+
 	def who(self):
 		if len(self.manager.active_nodes) == 0:
 			self.display.info('No nodes are active')

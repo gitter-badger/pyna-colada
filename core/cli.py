@@ -52,6 +52,9 @@ class CommandLineInterface(object):
 			key = message[3:]
 			self.processor.identity(key)
 			return
+		if '/help' in message[:5]:
+			self.processor.help()
+			return
 		# User wants to know which aliases are active
 		if '/who' in message[:4]:
 			self.processor.who()
