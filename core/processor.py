@@ -4,6 +4,7 @@ from core.display import Display
 from core.manager import Manager
 
 class Processor(object):
+	'''Controls the behavior of commands that need to be displayed or sent out'''
 	def __init__(self, relay, display, manager):
 		self.relay = relay
 		self.display = display
@@ -41,7 +42,7 @@ class Processor(object):
 		self.display.info('/con <Target> connects to a target')
 		self.display.info('/ping <Target> pings a target')
 		self.display.info('/pingall pings all authorized nodes')
-		self.display.info('/exit closes this node')
+		self.display.info('/exit closes this node\n')
 
 	def who(self):
 		if len(self.manager.active_nodes) == 0:

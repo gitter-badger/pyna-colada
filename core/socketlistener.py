@@ -2,12 +2,15 @@ import json, socket, time, sys
 
 # Main server clas
 class SocketListener(object):
+    '''Socket Listening parent class; responsible for creating, binding, and listening on a socket'''
+
     def __init__(self, address, port, debug=False):
         self.address = address
         self.port = port
         self.debug = debug
 
     def create_socket(self):
+        '''Create and bind a socket on the address and port specified at startup'''
         # Create a socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -18,27 +21,29 @@ class SocketListener(object):
             # No dice. Kill the process.
             print('ERROR: Unable to bind socket: {0}'.format(msg))
             return
-        # We have a working socket, set it up and inform the user
-        self.sock.listen(1)
+        # We have a working socket, listen on it with a 1.0s time out
+        self.sock.listen(1.0)
 
     # Create a socket then log everything that we receive
     def __running__(self):
+        '''Listening loop'''
         self.create_socket()
         while self.sock is not None:
             self.receive_from_socket()
-            time.sleep(1)
+            time.sleep(1.0)
 
     # do something with the message we have received
     def interpret_message(self,msg):
-        print(msg)
+        '''interpret the received message; override this method'''
+        pass
 
     # receive a message on our socket
     def receive_from_socket(self):
+        '''Actually handles the receipt of messages on the socket'''
         connection, address = self.sock.accept()
         response = connection.recv(1024)
         try:
             sent = json.loads(response.decode("utf-8"))
             self.interpret_message(sent)
         except Exception as msg:
-            if self.debug:
-                print('Error on Listener Thread: {0}'.format(msg))
+            pass
