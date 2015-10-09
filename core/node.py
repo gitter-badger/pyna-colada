@@ -12,10 +12,10 @@ from core.processor import Processor
 class Node(object):
 	'''Main PyNa Colada class. This initializes and handles threads for Pyna Colada'''
 
-	def __init__(self,alias,address,port):
-		self.address = address
+	def __init__(self,alias,location,port):
+		self.location = location
 		self.port = port
-		self.manager = Manager(alias,address,port)
+		self.manager = Manager(alias,location,port)
 
 	def start(self):
 		'''Start up this node'''
@@ -24,7 +24,7 @@ class Node(object):
 
 		# Provide information to user and other clients (the latter via ping)
 		self.display.pyna_colada(self.manager.version)
-		self.display.log('Node running on {0}:{1}\n'.format(self.address,self.port))
+		self.display.log('Node running on {0}:{1}\n'.format(self.location,self.port))
 		self.processor.broadcast('connection',targets=self.manager.authorized_nodes)
 
 		# Await initialization before starting client thread
@@ -44,7 +44,7 @@ class Node(object):
 
 	def start_up_listener(self):
 		'''Set up the listener thread separately'''
-		self.listener = Listener(self.interpreter,self.address,int(self.port))
+		self.listener = Listener(self.interpreter,self.location,int(self.port))
 		self.listener.display = self.display
 		# thread
 		listener_thread = threading.Thread(target=self.listener.__running__)

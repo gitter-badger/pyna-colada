@@ -1,6 +1,18 @@
 {
-	"version": "0.4.0",
+	"version": "0.4.3",
 	"name": "Py\u00d1a Colada",
 	"uid": "BeepBoopIAmARobot",
-	"logger": "192.168.0.10:8082"
+	"logger": "192.168.0.10:8082",
+	"bindings": {
+		"chat": "/all",
+		"whisper": "/w",
+		"whisperToggle": "/wt",
+		"reply": "/r",
+		"ping": "/ping",
+		"pingall": "/pingall",
+		"info": "/?",
+		"who": "/who",
+		"authorize": "/auth",
+		"exit": "/exit"
+	}
 }

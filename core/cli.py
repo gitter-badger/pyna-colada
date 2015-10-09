@@ -68,7 +68,7 @@ class CommandLineInterface(object):
 		self.processor.broadcast('chat',message)
 
 	def split_target_and_message(self,message):
-		'''This method attempts to split the alias/address and message in an input line'''
+		'''This method attempts to split the alias/location and message in an input line'''
 		if len(message) > 0:
 			try:
 				index_of_space = message.index(' ')

@@ -4,8 +4,8 @@ from core.socketlistener import SocketListener
 # Main server clas
 class Listener(SocketListener):
     '''The listener which is actually used in PC; might have additional functionality soon'''
-    def __init__(self, interpreter, address, port,debug=False):
-        super().__init__(address,port,debug)
+    def __init__(self, interpreter, location, port,debug=False):
+        super().__init__(location,port,debug)
         self.interpreter = interpreter
 
     def interpret_message(self,msg):

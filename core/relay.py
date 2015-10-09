@@ -11,27 +11,28 @@ class Relay(object):
 
 
 	def send_message(self,message,target):
-		'''Send a message of any type to a uid/alias/address'''
-		# Figure out what the address is doing
-		address = self.manager.get_location(target)
-		if address is None:
+		'''Send a message of any type to a uid/alias/location'''
+		# Figure out what the location is doing
+		location = self.manager.get_location(target)
+		if location is None:
 			# Erroneous; no user exists here
 			self.display.warn('No user was found at {0}'.format(target))
 			return
 		# Try to send the message
-		if self.sender.try_to_send(message,address):
+		if self.sender.try_to_send(message,location):
 			# everything went according to plan so just exit
 			return
 		# If not connection or disconnection, warn the user that there's no appropriate user
 		if ('connection' not in message['type'] and target is not None):
-			self.display.warn('mesh-chat application does not appear to exist at {0}'.format(address))
+			self.display.warn('mesh-chat application does not appear to exist at {0}'.format(location))
 			# Try to deactivate the node at this target (if it exists)
-			self.manager.deactivate_node(address)
+			self.manager.deactivate_node(location)
+
 
 
 	def send_to_all(self,json,target_nodes):
 		'''Sends a message to all nodes within the specified target_nodes list'''
 		for node in target_nodes:
-			address = self.manager.get_location(node['address'])
-			if address != self.manager.address:
-				self.send_message(json,address)
+			location = self.manager.get_location(node['location'])
+			if location != self.manager.location:
+				self.send_message(json,location)

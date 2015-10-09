@@ -9,7 +9,7 @@ class Packager(object):
 
 	def utc_to_local(self,utc_dt):
 		'''Changes the UTC timezone to local timezone'''
-	    return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
+		return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
 
 	# Package up our data. Most of this will be in a json file, but we're not quite there yet
 	def pack(self,message_type,message=""):

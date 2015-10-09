@@ -4,19 +4,19 @@ import json, socket, time, sys
 class SocketListener(object):
     '''Socket Listening parent class; responsible for creating, binding, and listening on a socket'''
 
-    def __init__(self, address, port, debug=False):
-        self.address = address
+    def __init__(self, location, port, debug=False):
+        self.location = location
         self.port = port
         self.debug = debug
 
     def create_socket(self):
-        '''Create and bind a socket on the address and port specified at startup'''
+        '''Create and bind a socket on the location and port specified at startup'''
         # Create a socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # Try to bind the socket
         try:
-            self.sock.bind((self.address, self.port))
+            self.sock.bind((self.location, self.port))
         except socket.error as msg:
             # No dice. Kill the process.
             print('ERROR: Unable to bind socket: {0}'.format(msg))
@@ -40,10 +40,8 @@ class SocketListener(object):
     # receive a message on our socket
     def receive_from_socket(self):
         '''Actually handles the receipt of messages on the socket'''
-        connection, address = self.sock.accept()
+        connection, location = self.sock.accept()
         response = connection.recv(1024)
-        try:
-            sent = json.loads(response.decode("utf-8"))
-            self.interpret_message(sent)
-        except Exception as msg:
-            pass
+
+        sent = json.loads(response.decode("utf-8"))
+        self.interpret_message(sent)

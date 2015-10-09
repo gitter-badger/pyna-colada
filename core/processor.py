@@ -36,7 +36,7 @@ class Processor(object):
 			self.info(user)
 
 	def help(self):
-		self.display.info('/w <Target> sends a whisper private message to an address, alias, or uid')
+		self.display.info('/w <Target> sends a whisper private message to an location, alias, or uid')
 		self.display.info('/r sends a whisper to the most recent whisperer')
 		self.display.info('/who displays information about all active nodes')
 		self.display.info('/con <Target> connects to a target')
@@ -53,7 +53,7 @@ class Processor(object):
 			self.info(node)
 
 	def info(self,node):
-		self.display.info("{2}:  {0} ({1})".format(node['alias'],node['uid'],node['address']))
+		self.display.info("{2}:  {0} ({1})".format(node['alias'],node['uid'],node['location']))
 
 	def node_list_hash(self,target):
 		hashed = self.manager.get_node_hash()
