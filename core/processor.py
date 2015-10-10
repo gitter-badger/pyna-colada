@@ -57,15 +57,15 @@ class Processor(object):
 
 	def node_list_hash(self,target):
 		hashed = self.manager.get_node_hash()
-		packed_json = self.packager.pack('nodeListHash',hashed)
+		packed_json = self.packager.pack('nodelisthash',hashed)
 		self.relay.send_message(packed_json,target)
 
 	def full_node_list(self,target):
 		node_list = self.manager.get_node_list()
-		self.send('nodeListFull',target,node_list)
+		self.send('nodelistfull',target,node_list)
 
 	def node_list_diff(self,node_list,target):
-		self.send('nodeListDiff',target,node_list)
+		self.send('nodelistdiff',target,node_list)
 
 	def send(self,type,target,content=''):
 		packaged_json = self.packager.pack(type,content)

@@ -1,19 +1,29 @@
 import json
+from core.crypto import Crypto
 
 class Interpreter(object):
 	def __init__(self, processor, display, manager):
 		self.display = display
 		self.manager = manager
 		self.processor = processor
-
 	# Handles receipt of the actual json we take in
-	def interpret_message(self,msg):
-		'''Figure out what to do with a received message'''
+	def interpret_message(self,enc_msg):
+		'''
+		Decrypt and identify message
+		'''
 		# add this server to our list since we know it's real
-		self.display.debug('{0} received\n{1}'.format(msg['type'],msg))
-		sender = msg['sender']
-		self.check_node_status(sender)
+		jsmsg = self.crypto.decrypt(enc_msg)
+		msg = json.loads(jsmsg.strip())
+		#self.display.debug('{0} received\n{1}'.format(msg['type'],msg))
+		self.check_node_status(msg['sender'])
 		# Determine what needs to be done according to the message type
+		self.handleMessageType(msg)
+
+	def handleMessageType(self,msg):
+		'''
+		Figure out what to do with a received message
+		'''
+		sender = msg['sender']
 		if msg['type'] == 'ping':
 			self.processor.send("pingReply",sender['location'])
 			return
@@ -29,17 +39,17 @@ class Interpreter(object):
 		self.display.display(msg)
 
 	def interpret_node_list(self,msg,sender):
-		if msg['type'] == 'nodeListHash':
+		if msg['type'] == 'nodelisthash':
 			if not self.manager.hash_is_identical(msg['message']):
 				self.processor.full_node_list(sender['location'])
 			else: self.display.debug('Hashes are identical with {0}'.format(sender['alias']))
 			return
-		if msg['type'] == 'nodeListFull':
+		if msg['type'] == 'nodelistfull':
 			unique_to_sender = self.manager.diff_node_list(msg['message'])
 			self.processor.node_list_diff(unique_to_sender,sender['location'])
 			self.processor.broadcast('ping',targets=self.manager.authorized_nodes)
 			return
-		if msg['type'] == 'nodeListDiff':
+		if msg['type'] == 'nodelistdiff':
 			diffed_nodes = self.manager.add_nodes(msg['message'])
 			self.processor.broadcast('ping',targets=diffed_nodes)
 			return

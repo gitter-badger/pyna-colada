@@ -10,7 +10,7 @@ class Sender(object):
         self.display = display
 
     # Try to send over socket
-    def try_to_send(self, js,target):
+    def try_to_send(self, message,target):
         '''Wrapper for sending on a socket; boolean indicates successful send'''
         try:
             location, port = target.split(':')
@@ -18,13 +18,13 @@ class Sender(object):
             self.display.warn("Value Error: {0}".format(msg))
             return False
         except AttributeError:
-            self.display.debug('ERROR: No user was found at {0}'.format(target))
+            self.display.debug('Sender ERROR: No user was found at {0}'.format(target))
         # encode the json and create the socket
-        message = str.encode(str(json.dumps(js)))
         try:
             self.socket_send(message,location,port)
         except Exception as msg:
-            self.display.debug('ERROR: {0}\n'.format(msg))
+            #print(message)
+            self.display.debug('Sender ERROR: {0}\n'.format(msg))
             return False
         return True
 

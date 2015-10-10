@@ -1,5 +1,5 @@
 {
-	"version": "0.4.3",
+	"version": "0.4.5",
 	"name": "Py\u00d1a Colada",
 	"uid": "BeepBoopIAmARobot",
 	"logger": "192.168.0.10:8082",
@@ -8,6 +8,7 @@
 		"whisper": "/w",
 		"whisperToggle": "/wt",
 		"reply": "/r",
+		"ban": "/ban",
 		"ping": "/ping",
 		"pingall": "/pingall",
 		"info": "/?",

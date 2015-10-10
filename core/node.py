@@ -8,6 +8,7 @@ from core.relay import Relay
 from core.cli import CommandLineInterface
 from core.manager import Manager
 from core.processor import Processor
+from core.crypto import Crypto
 
 class Node(object):
 	'''Main PyNa Colada class. This initializes and handles threads for Pyna Colada'''
@@ -39,8 +40,12 @@ class Node(object):
 		self.relay = Relay(self.sender,self.display,self.manager)
 		self.processor = Processor(self.relay,self.display, self.manager)
 		self.interpreter = Interpreter(self.processor,self.display,self.manager)
-		self.interpreter.display = self.display
 		self.cli = CommandLineInterface(self.processor,self.display)
+
+		# Crypto
+		crypto = Crypto(self.display)
+		self.relay.crypto = crypto
+		self.interpreter.crypto = crypto
 
 	def start_up_listener(self):
 		'''Set up the listener thread separately'''

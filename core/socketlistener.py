@@ -42,6 +42,4 @@ class SocketListener(object):
         '''Actually handles the receipt of messages on the socket'''
         connection, location = self.sock.accept()
         response = connection.recv(1024)
-
-        sent = json.loads(response.decode("utf-8"))
-        self.interpret_message(sent)
+        self.interpret_message(response)
