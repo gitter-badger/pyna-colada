@@ -1,5 +1,5 @@
 #PyÑa Colada [![Code Climate](https://codeclimate.com/github/etkirsch/pyna-colada/badges/gpa.svg)](https://codeclimate.com/github/etkirsch/pyna-colada) [![Test Coverage](https://codeclimate.com/github/etkirsch/pyna-colada/badges/coverage.svg)](https://codeclimate.com/github/etkirsch/pyna-colada/coverage)
-A `mesh-chat` application built in Python 3.4.3
+A `mesh-chat` application built in Python 3.4.3. PyÑa Colada uses combined RSA (PKCS 15) and AES encryption for sending and receiving messages. It is a nearly-fully-featured, fully-configurable chat client that can be run in a bash terminal. PyÑa Colada also implements a modularized architecture intended for easy substitions (e.g. replacing the UI portion with a neural network or custom python script for autonomy).
 
 
 ##Installation and Running
@@ -38,5 +38,5 @@ The operation of `[message]` without a command varies. The `/all` command is ass
 * `/exit` disconnects from the mesh network and exits the application
 
 ##Future Features
-* Authorization of servers
-* Serverlist sharing
+* **Public Key Import** as mandated in the `mesh-chat` security protocol (coming in v0.5.0)
+* **Message Relays** which permit multi-network relaying of messages (coming in v0.6.0)
