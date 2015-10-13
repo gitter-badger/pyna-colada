@@ -52,9 +52,7 @@ class CommandLineInterface(object):
 			key = message[3:]
 			self.processor.identity(key)
 			return
-		if '/help' in message[:5]:
-			self.processor.help()
-			return
+
 		# User wants to know which aliases are active
 		if '/who' in message[:4]:
 			self.processor.who()
@@ -62,6 +60,15 @@ class CommandLineInterface(object):
 		# User wants to know more about the application
 		if '/about' in message[:6]:
 			self.processor.about()
+			return
+
+		if '/import ' in message[:8]:
+			self.processor.importNode(message[8:])
+			return
+
+		if '/export' in message[:7]:
+			self.processor.exportSelf()
+			self.display.info('Exported settings to file!')
 			return
 
 		# default: send a chat message

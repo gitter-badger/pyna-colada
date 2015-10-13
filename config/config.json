@@ -4,16 +4,16 @@
 	"uid": "BeepBoopIAmARobot",
 	"logger": "192.168.0.10:8082",
 	"bindings": {
-		"chat": "/all",
-		"whisper": "/w",
-		"whisperToggle": "/wt",
-		"reply": "/r",
-		"ban": "/ban",
-		"ping": "/ping",
+		"chat": "/all ",
+		"whisper": "/w ",
+		"whisperToggle": "/wt ",
+		"reply": "/r ",
+		"ban": "/ban ",
+		"ping": "/ping ",
 		"pingall": "/pingall",
-		"info": "/?",
+		"info": "/? ",
 		"who": "/who",
-		"authorize": "/auth",
+		"authorize": "/auth ",
 		"exit": "/exit"
 	}
 }

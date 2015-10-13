@@ -1,60 +1,64 @@
 import hashlib, json
 from core.packager import Packager
+from core.nodelist import NodeList
 
 class Manager(object):
-	'''Manages all things related to other nodes and configuration settings'''
+	'''
+	Manages all things related to other nodes and configuration settings
+	'''
 
 	def __init__(self, alias, location, port):
 		self.alias = alias
 		self.active_nodes = []
 		self.most_recent_whisperer = None
 		self.location = '{0}:{1}'.format(location,port)
+		self.node_list = NodeList()
 		self.load()
 
 	def load(self):
-		'''Load all configuration settings and nodes'''
+		'''
+		Load all configuration settings and nodes
+		'''
 		config = json.load(open('config/config.json','r'))
 		self.version = config['version']
 		self.uid = config['uid']
-		self.load_in_nodes(self.location)
-		self.logger = config['logger']
-		if self.location == self.logger:
-			self.logger = ""
+		self.node_list.load()
 
-	def load_in_nodes(self,location):
-		'''Load in all nodes from our nodes.json file into authorized_nodes'''
-		self.authorized_nodes = []
-		# open the json
-		with open('config/nodes.json','r') as auth:
-			data = json.load(auth)
-		# add those which are not already in our authorized_node_list
+	def importNode(self,filename):
+		'''
+		Imports a Node so it may connect and initialize into the network
+		'''
+		return self.node_list.importNode(filename)
+
+	def exportSelf(self):
+		'''
+		Exports the current settings to a file which can be imported
+		'''
+		data = {"uid": self.uid, "alias": self.alias, "location": self.location, "publicKey": self.crypto.getPublic().decode('utf-8') }
+		with open('{0}.json'.format(self.alias),'w') as auth:
+			json.dump(data, auth)
 
 	def create_packager(self):
-		'''Create a packager from our config settings'''
+		'''
+		Create a packager from our config settings
+		'''
 		return Packager(self.version,{"alias": self.alias, "location": self.location, "uid": self.uid})
 
-	# not sure if the user typed in a location or alias, so try to get a location
-	def get_location(self,key):
-		'''Use this to translate an alias, location, or uid into an ip location'''
-		# if key is an alias
-		node = self.find_in_active(key,key,key,key)
-		if node is not None:
-			return node['location']
+	def getNode(self, key):
 		if type(key) is dict:
-			return key['location']
-		return key
+			return key
+		return self.find_in_active(key,key,key,key)
 
 	# Try to add the alias/location to active nodes and active aliases
 	def activate_node(self, sender):
 		'''Activate a remote node which we either sent to or received from successfully'''
-		#if sender not in self.authorized_nodes:
-		#	self.authorize(sender)
 		if (sender not in self.active_nodes and sender['location'] != self.location):
 			self.active_nodes.append(sender)
 			return True
 		return False
 
 	def find_in_active(self, alias="", location="", uid="", publicKey=""):
+		'''todo rewrite'''
 		'''Check to see if any criteria match, and return the respective node if so'''
 		for node in self.active_nodes:
 			if node['alias'] == alias or node['location'] == location or node['uid'] == uid:
@@ -64,12 +68,7 @@ class Manager(object):
 	def get_node_hash(self):
 		'''Create a Node Hash for nodeListHash command'''
 		# create a list of publickeys
-		publickeys = ""
-		if len(self.authorized_nodes) > 0:
-			publickeys = publickeys + self.authorized_nodes[0]['publicKey']
-			if len(self.authorized_nodes) > 0:
-				for node in self.authorized_nodes[1:]:
-					publickeys = publickeys + "{0}".format(node['publicKey'])
+		publickeys = self.node_list.hash()
 		# actually encode
 		hashed = hashlib.sha512()
 		hashed.update(publickeys.encode('utf-8'))
@@ -82,42 +81,21 @@ class Manager(object):
 
 	def get_node_list(self):
 		'''Helper method which returns authorized nodes in a standard format'''
-		return json.dumps({"nodes":self.authorized_nodes})
-
-	def diff_node_list(self,node_list_json):
-		'''diff the node list from a json file with our nodes'''
-		# Go through and add uniques
-		node_list = json.loads(node_list_json)
-		self.add_nodes(node_list['nodes'])
-		diffed_list = []
-		# now finally diff
-		for node in self.authorized_nodes:
-			if node not in node_list['nodes']:
-				diffed_list.append(node)
-		return diffed_list
-
-	def add_nodes(self,node_list):
-		'''Add a list of nodes to our authorized node list'''
-		for node in node_list:
-			if node not in self.authorized_nodes:
-				self.authorized_nodes.append(node)
-		self.save_node_list()
+		return self.node_list.toJson()
 
 	def authorize(self,sender):
-		'''Attempt to authorize a node'''
-		if sender in self.authorized_nodes:
-			return False
-		self.authorized_nodes.append(sender)
-		# Update our nodes.json with the new node info
-		self.save_node_list()
-		return True
+		'''
+		Attempt to authorize a node
+		'''
+		if not self.node_list.isAuthorized(sender):
+			self.node_list.add(sender)
 
-	def save_node_list(self):
-		'''Save the node list to a file'''
-		data = json.load(open('config/nodes.json','r'))
-		data.update({"nodes":self.authorized_nodes})
-		with open('config/nodes.json','w') as auth:
-			json.dump(data, auth)
+	def getPublicKey(self,node):
+		matched = self.node_list.matchTo(node)
+		public = ""
+		if matched is not None:
+			public = matched['publicKey']
+		return public
 
 	# remove an ip location (location) from active_node_list and its aliases
 	def deactivate_node(self, key):

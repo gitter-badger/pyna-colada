@@ -41,5 +41,5 @@ class SocketListener(object):
     def receive_from_socket(self):
         '''Actually handles the receipt of messages on the socket'''
         connection, location = self.sock.accept()
-        response = connection.recv(1024)
+        response = connection.recv(65535)
         self.interpret_message(response)

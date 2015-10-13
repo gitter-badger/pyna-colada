@@ -29,20 +29,24 @@ class Processor(object):
 
 	def identity(self,key):
 		# if this is an alias
-		user = self.manager.find_in_active(key)
+		user = self.manager.getNode(key)
 		if user is None:
 			self.display.info('No user or node was found with key \'{0}\''.format(key))
-		else:
-			self.info(user)
+			return
+		self.info(user)
 
-	def help(self):
-		self.display.info('/w <Target> sends a whisper private message to an location, alias, or uid')
-		self.display.info('/r sends a whisper to the most recent whisperer')
-		self.display.info('/who displays information about all active nodes')
-		self.display.info('/con <Target> connects to a target')
-		self.display.info('/ping <Target> pings a target')
-		self.display.info('/pingall pings all authorized nodes')
-		self.display.info('/exit closes this node\n')
+	def importNode(self, filename):
+		'''
+		Attempt to import a node file
+		'''
+		new_node = self.manager.importNode(filename)
+		if new_node is not None:
+			self.full_node_list(new_node)
+			return
+		self.display.warn('Malformed or missing file \'{0}\''.format(filename))
+
+	def exportSelf(self):
+		self.manager.exportSelf()
 
 	def who(self):
 		if len(self.manager.active_nodes) == 0:

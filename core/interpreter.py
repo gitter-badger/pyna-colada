@@ -12,8 +12,7 @@ class Interpreter(object):
 		Decrypt and identify message
 		'''
 		# add this server to our list since we know it's real
-		jsmsg = self.crypto.decrypt(enc_msg)
-		msg = json.loads(jsmsg.strip())
+		msg = self.crypto.decrypt(enc_msg)
 		#self.display.debug('{0} received\n{1}'.format(msg['type'],msg))
 		self.check_node_status(msg['sender'])
 		# Determine what needs to be done according to the message type
@@ -25,6 +24,7 @@ class Interpreter(object):
 		'''
 		sender = msg['sender']
 		if msg['type'] == 'ping':
+			# May not always work (in the handshakes)
 			self.processor.send("pingReply",sender['location'])
 			return
 		if msg['type'] == 'disconnection':
@@ -47,7 +47,7 @@ class Interpreter(object):
 		if msg['type'] == 'nodelistfull':
 			unique_to_sender = self.manager.diff_node_list(msg['message'])
 			self.processor.node_list_diff(unique_to_sender,sender['location'])
-			self.processor.broadcast('ping',targets=self.manager.authorized_nodes)
+			self.processor.broadcast('ping',targets=self.manager.node_list.authorized_nodes)
 			return
 		if msg['type'] == 'nodelistdiff':
 			diffed_nodes = self.manager.add_nodes(msg['message'])

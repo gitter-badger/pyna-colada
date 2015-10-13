@@ -26,7 +26,7 @@ class Node(object):
 		# Provide information to user and other clients (the latter via ping)
 		self.display.pyna_colada(self.manager.version)
 		self.display.log('Node running on {0}:{1}\n'.format(self.location,self.port))
-		self.processor.broadcast('connection',targets=self.manager.authorized_nodes)
+		self.processor.broadcast('ping',targets=self.manager.node_list.authorized_nodes)
 
 		# Await initialization before starting client thread
 		time.sleep(1)
@@ -34,7 +34,9 @@ class Node(object):
 		sender_thread.start()
 
 	def initialize_components(self):
-		'''Build up all components in the node'''
+		'''
+		Build up all components in the node
+		'''
 		self.display = Display()
 		self.sender = Sender(self.display)
 		self.relay = Relay(self.sender,self.display,self.manager)
@@ -46,6 +48,7 @@ class Node(object):
 		crypto = Crypto(self.display)
 		self.relay.crypto = crypto
 		self.interpreter.crypto = crypto
+		self.manager.crypto = crypto
 
 	def start_up_listener(self):
 		'''Set up the listener thread separately'''
