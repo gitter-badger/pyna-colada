@@ -58,3 +58,5 @@ target/
 
 # User stuff
 /*.json
+/clean.py
+*.pyna
