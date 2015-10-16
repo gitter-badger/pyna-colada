@@ -37,31 +37,20 @@ class Crypto(object):
 		rsa_aes_iv = rsa.encrypt(aes_iv_rand, pubKey)
 
 		combined = rsa_aes_key + rsa_aes_iv + aes_msg
-		print('Length of combined:  {0}'.format(len(rsa_aes_key)))
-		print('Length of combined:  {0}'.format(len(rsa_aes_iv)))
-		print('Length of combined:  {0}'.format(len(aes_msg)))
-
-		b64out  = str(base64.b64encode(combined))
-		print(type(b64out))
-		return b64out
+		b64out  = base64.b64encode(combined)
+		return b64out.decode()
 
 
 	def decrypt(self, js):
 		'''
 		Decrypt a message
 		'''
-		print('{0}: {1}'.format(type(js),js))
-		jsmsg = json.loads(js.decode('utf-8'))
-		jsm = jsmsg['message']
-		msg = base64.b64decode(jsm).strip()
+		jsmsg = json.loads(js.decode('utf-8', errors="ignore"))
+		msg = base64.b64decode(jsmsg['message'])
 
 		rsa_aes_key = msg[:256]
 		rsa_aes_iv = msg[256:512]
 		aes_msg = msg[512:]
-
-		print('Length of combined:  {0}'.format(len(rsa_aes_key)))
-		print('Length of combined:  {0}'.format(len(rsa_aes_iv)))
-		print('Length of combined:  {0}'.format(len(aes_msg)))
 
 		# Gather the AES
 		aes_key_rand = rsa.decrypt(rsa_aes_key, self.private)
@@ -70,8 +59,8 @@ class Crypto(object):
 
 		dec_pre_strip = aes_key.decrypt(aes_msg)
 		decrypted = (dec_pre_strip).decode("utf-8", errors="ignore")
-		#dumpjs = json.dumps(decrypted).strip()
 		js = json.loads(decrypted)
+
 		return js
 
 	def generateKeys(self):

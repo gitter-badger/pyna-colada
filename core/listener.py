@@ -26,6 +26,7 @@ class PynaColadaTCPServer(socketserver.TCPServer):
         self.interpreter = interpreter
 
     def interpretMessage(self, msg):
+        #print('length of msg:  {0}\n\n'.format(len(msg)))
         self.interpreter.interpretMessage(msg)
 
 class PynaColadaHttpServer(http.server.CGIHTTPRequestHandler):

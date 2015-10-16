@@ -30,6 +30,7 @@ class Sender(object):
     def send(self,message,location,port):
         '''Actually send an encoded json message to the location and port'''
         try:
-            requests.post('http://{0}:{1}'.format(location, port), json={"message":message})
-        except Exception as msg:
-            print(msg)
+            r = requests.post('http://{0}:{1}'.format(location, port), json={"message":message},headers={'Connection':'close'}, stream=False, timeout=0.001)
+            f = r.status_code # nope, don't worry about this
+        except Exception as msg: pass
+            #display.debug(msg)
