@@ -52,9 +52,8 @@ class Node(object):
 
 	def start_up_listener(self):
 		'''Set up the listener thread separately'''
-		self.listener = Listener(self.interpreter,self.location,int(self.port))
-		self.listener.display = self.display
+		self.listener = Listener(int(self.port),self.interpreter)
 		# thread
-		listener_thread = threading.Thread(target=self.listener.__running__)
+		listener_thread = threading.Thread(target=self.listener.__launch__)
 		listener_thread.daemon = True
 		listener_thread.start()

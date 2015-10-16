@@ -7,7 +7,7 @@ class Interpreter(object):
 		self.manager = manager
 		self.processor = processor
 	# Handles receipt of the actual json we take in
-	def interpret_message(self,enc_msg):
+	def interpretMessage(self,enc_msg):
 		'''
 		Decrypt and identify message
 		'''
