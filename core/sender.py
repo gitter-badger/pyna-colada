@@ -1,4 +1,4 @@
-import json, socket, sys
+import json, socket, sys, requests
 from core.display import Display
 
 # Main client class
@@ -21,26 +21,15 @@ class Sender(object):
             self.display.debug('Sender ERROR: No user was found at {0}'.format(target))
         # encode the json and create the socket
         try:
-            self.socket_send(message,location,port)
+            self.send(message,location,port)
         except Exception as msg:
-            #print(message)
             self.display.debug('Sender ERROR: {0}\n'.format(msg))
             return False
         return True
 
-    def socket_send(self,message,location,port):
+    def send(self,message,location,port):
         '''Actually send an encoded json message to the location and port'''
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.settimeout(1.0)
-        # try to connect and send on this socket
-        total_sent = 0
-        self.sock.connect((location,int(port)))
-        # Loop while we send a stream
-        while total_sent < len(message):
-            sent = self.sock.send(message[total_sent:])
-            if sent == 0:
-                raise RuntimeError('Connection closed erroneously')
-            total_sent = total_sent + sent
-        # everything went according to plan, close the socket and activate the server
-        self.sock.close()
+        try:
+            requests.post('http://{0}:{1}'.format(location, port), json={"message":message})
+        except Exception as msg:
+            print(msg)
