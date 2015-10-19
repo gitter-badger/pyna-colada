@@ -14,9 +14,10 @@ class Interpreter(object):
 		# add this server to our list since we know it's real
 		msg = self.crypto.decrypt(enc_msg)
 		#self.display.debug('{0} received\n{1}'.format(msg['type'],msg))
-		self.check_node_status(msg['sender'])
-		# Determine what needs to be done according to the message type
+		need_to_nlh = self.check_node_status(msg['sender'])
 		self.handleMessageType(msg)
+		if need_to_nlh:
+			self.processor.node_list_hash(msg['sender'])
 
 	def handleMessageType(self,msg):
 		'''
@@ -31,7 +32,7 @@ class Interpreter(object):
 			self.manager.deactivate_node(sender)
 			self.display.disconnected(sender['alias'],sender['location'])
 			return
-		if 'nodeList' in msg['type']:
+		if 'nodelist' in msg['type']:
 			self.interpret_node_list(msg,sender)
 			return
 		if msg['type'] == 'whisper':
@@ -44,22 +45,22 @@ class Interpreter(object):
 				self.processor.full_node_list(sender['location'])
 			else: self.display.debug('Hashes are identical with {0}'.format(sender['alias']))
 			return
-		if msg['type'] == 'nodelistfull':
-			unique_to_sender = self.manager.diff_node_list(msg['message'])
-			self.processor.node_list_diff(unique_to_sender,sender['location'])
-			self.processor.broadcast('ping',targets=self.manager.node_list.authorized_nodes)
-			return
 		if msg['type'] == 'nodelistdiff':
-			diffed_nodes = self.manager.add_nodes(msg['message'])
+			diffed_nodes = self.manager.node_list.addList(msg['message'])
 			self.processor.broadcast('ping',targets=diffed_nodes)
+			return
+		if msg['type'] == 'nodelist':
+			unique_to_sender = self.manager.node_list.diff(msg['message'])
+			if len(unique_to_sender) > 0:
+				self.processor.node_list_diff(unique_to_sender,sender['location'])
+			self.processor.broadcast('ping',targets=self.manager.node_list.authorized_nodes)
 			return
 
 	# For new connections
 	def check_node_status(self, sender):
 		# tell the client to try to activate the server
-		location = sender['location']
-		alias = sender['alias']
 		# If this is not active... activate it! Then NodeListHash it
 		if self.manager.activate_node(sender):
-			self.processor.node_list_hash(sender['location'])
-			self.display.log('Registered {0} at {1}'.format(alias,location))
+			self.display.log('Registered {0} at {1}'.format(sender['alias'],sender['location']))
+			return True
+		return False

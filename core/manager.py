@@ -45,14 +45,19 @@ class Manager(object):
 		return Packager(self.version,{"alias": self.alias, "location": self.location, "uid": self.uid})
 
 	def getNode(self, key):
-		if type(key) is dict:
-			return key
-		return self.find_in_active(key,key,key,key)
+		if type(key) is not dict:
+			if key != self.location:
+				key = self.find_in_active(key,key,key,key)
+
+		if key['location'] == self.location:
+			return None
+
+		return key
 
 	# Try to add the alias/location to active nodes and active aliases
 	def activate_node(self, sender):
 		'''Activate a remote node which we either sent to or received from successfully'''
-		if (sender not in self.active_nodes and sender['location'] != self.location):
+		if sender not in self.active_nodes:
 			self.active_nodes.append(sender)
 			return True
 		return False

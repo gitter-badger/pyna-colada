@@ -45,7 +45,11 @@ class Crypto(object):
 		'''
 		Decrypt a message
 		'''
-		jsmsg = json.loads(js.decode('utf-8', errors="ignore"))
+		#print('js:  {0}'.format(js))
+		jsdec = js.decode('utf-8', errors="ignore")
+		#print('jsdec:  ' + jsdec)
+		jsmsg = json.loads(jsdec.strip())
+		#print('jsmsg:  ' + jsmsg)
 		msg = base64.b64decode(jsmsg['message'])
 
 		rsa_aes_key = msg[:256]
@@ -57,9 +61,11 @@ class Crypto(object):
 		aes_iv = rsa.decrypt(rsa_aes_iv,self.private)
 		aes_key = AES.new(aes_key_rand[:32],AES.MODE_CBC,aes_iv[:16])
 
+		# strip out padding at the end and load as json
 		dec_pre_strip = aes_key.decrypt(aes_msg)
 		decrypted = (dec_pre_strip).decode("utf-8", errors="ignore")
-		js = json.loads(decrypted)
+		end_of_json = decrypted.rfind('}')
+		js = json.loads(decrypted[:(1+end_of_json)].strip())
 
 		return js
 

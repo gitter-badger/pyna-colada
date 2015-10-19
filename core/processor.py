@@ -66,7 +66,7 @@ class Processor(object):
 
 	def full_node_list(self,target):
 		node_list = self.manager.get_node_list()
-		self.send('nodelistfull',target,node_list)
+		self.send('nodelist',target,node_list)
 
 	def node_list_diff(self,node_list,target):
 		self.send('nodelistdiff',target,node_list)

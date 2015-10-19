@@ -18,7 +18,7 @@ class Listener(object):
         except socket.error as msg:
             # No dice. Kill the process.
             print('ERROR: Unable to bind socket: {0}'.format(msg))
-            return
+            sys.exit(0)
 
 class PynaColadaTCPServer(socketserver.TCPServer):
     def __init__(self,location,handler,interpreter):
@@ -26,14 +26,21 @@ class PynaColadaTCPServer(socketserver.TCPServer):
         self.interpreter = interpreter
 
     def interpretMessage(self, msg):
-        #print('length of msg:  {0}\n\n'.format(len(msg)))
         self.interpreter.interpretMessage(msg)
 
-class PynaColadaHttpServer(http.server.CGIHTTPRequestHandler):
+class PynaColadaHttpServer(http.server.BaseHTTPRequestHandler):
+    # Keep quiet
+    def log_message(self,format,*args): pass
+
     def do_POST(self):
         '''
         Actually handles the receipt of messages on the socket
         '''
+        # Get the data and respond
         length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(length)
+        self.send_response(200,"OK")
+        self.end_headers()
+
+        # Now, interpret
         self.server.interpretMessage(post_data)
