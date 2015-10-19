@@ -1,24 +1,33 @@
 import json, socket, time, sys,cgi,urllib
-
-#TODO: FIX THIS -- BASE SHOULD NOT REFERENCE OUTSIDE OF BASE
-from pynacolada.core.TCPServer import UINodeTCPServer
-from pynacolada.core.HttpServer import UINodeHttpServer
+from pynacolada.base.TCPServer import TCPServer
+from pynacolada.base.HttpServer import HttpServer
 
 # Main server clas
 class Listener(object):
-    '''Http Server parent class; responsible for creating, binding, and listening'''
+    '''
+    Http Server parent class; responsible for creating, binding, and listening
+    '''
 
-    def __init__(self, port, interpreter):
-        self.port = port
-        self.interpreter = interpreter
+    def __init__(self, crypto, message_interpreter):
+        self.crypto = crypto
+        self.message_interpreter = message_interpreter
 
-    def __launch__(self):
-        '''Create and bind a socket on the location and port specified at startup'''
+    def __launch__(self, port):
+        '''
+        Daemonized; Create and bind a socket on the location and port specified at startup
+        '''
         try:
-            Handler = UINodeHttpServer
-            httpd = UINodeTCPServer(("",self.port), Handler, self.interpreter)
+            Handler = HttpServer
+            httpd = TCPServer(("",port), Handler, self)
             httpd.serve_forever()
         except socket.error as msg:
             # No dice. Kill the process.
             print('ERROR: Unable to bind socket: {0}'.format(msg))
             sys.exit(0)
+
+    def interpret(self, encrypted):
+        '''
+        Received a message from the TCP Server, so relay it to our message_interpreter
+        '''
+        decrypted = self.crypto.decrypt(encrypted)
+        self.message_interpreter.interpret(decrypted)

@@ -1,9 +1,9 @@
 import http.server
 
-class UINodeHttpServer(http.server.BaseHTTPRequestHandler):
+class HttpServer(http.server.BaseHTTPRequestHandler):
 
-    # Keep quiet
     def log_message(self,format,*args): pass
+        # Keep quiet
 
     def do_POST(self):
         '''

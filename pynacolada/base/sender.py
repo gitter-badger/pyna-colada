@@ -3,16 +3,28 @@ import json, socket, sys, requests,threading
 class Sender(object):
     '''Socket Sender; responsible ONLY for sending messages on an anonymous port'''
 
+    def __init__(self, crypto):
+        self.crypto = crypto
+
     # Try to send over socket
-    def try_to_send(self, message,target):
+    def try_to_send(self, message, target_node):
         '''
         Wrapper for sending on a socket; boolean indicates successful send
+        Argument "target_node" MUST be a node
         '''
-        location, port = target.split(':')
-        sender_thread = threading.Thread(target=self.send,args=(message,location,port,))
+        #print(target_node)
+
+        # Gather the target's location and port
+        location, port = target_node['location'].split(':')
+
+        # Encrypt
+        publicKey = target_node['publicKey']
+        encrypted = self.crypto.encrypt(message, publicKey)
+
+        # Spin up a thread for the POST to occur
+        sender_thread = threading.Thread(target=self.send,args=(encrypted,location,port,))
         sender_thread.daemon = True
         sender_thread.start()
-        return True
 
     def send(self,message,location,port):
         '''

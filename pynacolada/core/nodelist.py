@@ -62,14 +62,29 @@ class NodeList(object):
 		'''
 		return self.authorized_nodes
 
-	def matchTo(self, criterion):
+	def matchTo(self, criteria):
 		'''
 		Looks up an active node and gets its respective public key
 		'''
-		return_node = [node for node in self.authorized_nodes for key in criterion.keys() if criterion[key] == node[key]]
+		#print('Criteria: {0}'.format(criteria))
+		if len(criteria) < 4:
+			nodes = self.authorized_nodes
+			for key in criteria.keys():
+				nodes = [node for node in nodes if criteria[key] == node[key]]
+			return_node = nodes
+		else:
+			return_node = [node for node in self.authorized_nodes if criteria == node]
+
 		if len(return_node) > 0:
 			return return_node[0]
 		return None
+
+	def find(self,criterion):
+		'''
+		Checks to see if an authorized node meets a given criterion
+		'''
+		matches = [node for node in self.authorized_nodes if criterion in node.values()]
+		return matches[0]
 
 	def exists(self,criterion):
 		'''

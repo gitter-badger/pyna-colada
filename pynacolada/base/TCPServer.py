@@ -1,7 +1,6 @@
 import socketserver
-from pynacolada.core.interpreter import Interpreter
 
-class UINodeTCPServer(socketserver.TCPServer):
+class TCPServer(socketserver.TCPServer):
     '''
     A TCP Server which sends to a core.Interpreter on POST
     '''
@@ -11,4 +10,4 @@ class UINodeTCPServer(socketserver.TCPServer):
         self.interpreter = interpreter
 
     def interpretMessage(self, msg):
-        self.interpreter.interpretMessage(msg)
+        self.interpreter.interpret(msg)

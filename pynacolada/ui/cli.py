@@ -66,11 +66,6 @@ class CommandLineInterface(object):
 			self.processor.importNode(message[8:])
 			return
 
-		if '/export' in message[:7]:
-			self.processor.exportSelf()
-			self.display.info('Exported settings to file!')
-			return
-
 		# default: send a chat message
 		self.processor.broadcast('chat',message)
 

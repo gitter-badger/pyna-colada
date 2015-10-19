@@ -16,7 +16,9 @@ class UINode(object):
 	def __init__(self,alias,location,port):
 		self.location = location
 		self.port = port
+		self.alias = alias
 		self.manager = Manager(alias,location,port)
+		self.uid = self.manager.uid #TODO: Remove the need for manager's UID?
 
 	def start(self):
 		'''Start up this node'''
@@ -37,23 +39,30 @@ class UINode(object):
 		'''
 		Build up all components in the node
 		'''
+		# Base Components
 		self.display = Display()
-		self.sender = Sender()
+		self.crypto = Crypto(self.display)
+		self.sender = Sender(self.crypto)
+
 		self.relay = Relay(self.sender,self.display,self.manager)
 		self.processor = Processor(self.relay,self.display, self.manager)
 		self.interpreter = Interpreter(self.processor,self.display,self.manager)
 		self.cli = CommandLineInterface(self.processor,self.display)
 
 		# Crypto
-		crypto = Crypto(self.display)
-		self.relay.crypto = crypto
-		self.interpreter.crypto = crypto
-		self.manager.crypto = crypto
+		self.listener = Listener(self.crypto,self.interpreter)
+		self.export()
 
 	def start_up_listener(self):
 		'''Set up the listener thread separately'''
-		self.listener = Listener(int(self.port),self.interpreter)
-		# thread
-		listener_thread = threading.Thread(target=self.listener.__launch__)
+		listener_thread = threading.Thread(target=self.listener.__launch__, args=(int(self.port),))
 		listener_thread.daemon = True
 		listener_thread.start()
+
+	def export(self):
+		# Build Data Object
+		data = {"uid": self.uid, "alias": self.alias, "location": ':'.join([self.location,self.port])}
+		data["publicKey"] = self.crypto.getPublic().decode('utf-8')
+
+		with open('{0}.json'.format(self.alias),'w') as auth:
+			json.dump(data, auth)

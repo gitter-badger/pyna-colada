@@ -45,9 +45,6 @@ class Processor(object):
 			return
 		self.display.warn('Malformed or missing file \'{0}\''.format(filename))
 
-	def exportSelf(self):
-		self.manager.exportSelf()
-
 	def who(self):
 		if len(self.manager.active_nodes) == 0:
 			self.display.info('No nodes are active')

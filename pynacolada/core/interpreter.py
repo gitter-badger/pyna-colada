@@ -8,14 +8,11 @@ class Interpreter(object):
 		self.processor = processor
 
 	# Handles receipt of the actual json we take in
-	def interpretMessage(self,enc_msg):
+	def interpret(self,msg):
 		'''
-		Decrypt and identify message
+		Figure out what to do with this message
 		'''
-		# add this server to our list since we know it's real
-		msg = self.crypto.decrypt(enc_msg)
-
-		self.display.debug('{0} received\n{1}'.format(msg['type'],msg))
+		#self.display.debug('{0} received\n{1}'.format(msg['type'],msg))
 
 		need_to_nlh = self.check_node_status(msg['sender'])
 		self.handleMessageType(msg)
@@ -27,6 +24,10 @@ class Interpreter(object):
 		Figure out what to do with a received message
 		'''
 		sender = msg['sender']
+		#if not self.manager.node_list.exists(sender):
+		#	print('Message from unknown sender')
+		#	return
+
 		if msg['type'] == 'ping':
 			# May not always work (in the handshakes)
 			self.processor.send("pingReply",sender['location'])
@@ -46,17 +47,16 @@ class Interpreter(object):
 		if msg['type'] == 'nodelisthash':
 			if not self.manager.hash_is_identical(msg['message']):
 				self.processor.full_node_list(sender['location'])
-			else: self.display.debug('Hashes are identical with {0}'.format(sender['alias']))
 			return
 		if msg['type'] == 'nodelistdiff':
 			diffed_nodes = self.manager.node_list.addList(msg['message'])
-			self.processor.broadcast('ping',targets=diffed_nodes)
+			self.processor.broadcast('nodelisthash',targets=diffed_nodes)
 			return
 		if msg['type'] == 'nodelist':
 			unique_to_sender = self.manager.node_list.diff(msg['message'])
 			if len(unique_to_sender) > 0:
 				self.processor.node_list_diff(unique_to_sender,sender['location'])
-			self.processor.broadcast('ping',targets=self.manager.node_list.authorized_nodes)
+			self.processor.broadcast('nodelisthash',targets=self.manager.node_list.authorized_nodes)
 			return
 
 	# For new connections

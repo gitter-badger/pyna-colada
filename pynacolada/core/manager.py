@@ -38,14 +38,6 @@ class Manager(object):
 		'''
 		return self.node_list.importNode(filename)
 
-	def exportSelf(self):
-		'''
-		Exports the current settings to a file which can be imported
-		'''
-		data = {"uid": self.uid, "alias": self.alias, "location": self.location, "publicKey": self.crypto.getPublic().decode('utf-8') }
-		with open('{0}.json'.format(self.alias),'w') as auth:
-			json.dump(data, auth)
-
 	def create_packager(self):
 		'''
 		Create a packager from our config settings
@@ -54,10 +46,11 @@ class Manager(object):
 
 	def getNode(self, key):
 		if type(key) is not dict:
-			if key != self.location:
-				key = self.find_in_active(key,key,key,key)
+			key = self.node_list.find(key)
+		else:
+			 key = self.node_list.matchTo(key)
 
-		if key['location'] == self.location:
+		if (key is None or key['location'] == self.location):
 			return None
 
 		return key
@@ -65,18 +58,16 @@ class Manager(object):
 	# Try to add the alias/location to active nodes and active aliases
 	def activate_node(self, sender):
 		'''Activate a remote node which we either sent to or received from successfully'''
-		if sender not in self.active_nodes:
-			self.active_nodes.append(sender)
+		if sender['location'] == self.location:
+			return False
+
+		true_node = self.node_list.matchTo(sender)
+
+		if (true_node not in self.active_nodes and true_node is not None):
+			#print('True node:  {0}'.format(true_node))
+			self.active_nodes.append(true_node)
 			return True
 		return False
-
-	def find_in_active(self, alias="", location="", uid="", publicKey=""):
-		'''todo rewrite'''
-		'''Check to see if any criteria match, and return the respective node if so'''
-		for node in self.active_nodes:
-			if node['alias'] == alias or node['location'] == location or node['uid'] == uid:
-				return node
-		return None
 
 	def get_node_hash(self):
 		'''Create a Node Hash for nodeListHash command'''
@@ -113,6 +104,6 @@ class Manager(object):
 	# remove an ip location (location) from active_node_list and its aliases
 	def deactivate_node(self, key):
 		'''Deactivate a given node'''
-		node = self.find_in_active(key,key,key,key)
+		node = self.node_list.matchTo(key)
 		if node is not None:
 			self.active_nodes.remove(node)

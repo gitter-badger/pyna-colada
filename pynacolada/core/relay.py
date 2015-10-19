@@ -19,24 +19,17 @@ class Relay(object):
 		node = self.manager.getNode(target)
 		if node is None:
 			# Erroneous; no user exists here
-			self.display.warn('No user was found at {0}'.format(target['location']))
+			self.display.warn('No user was found')
 			return
 
-		# Encrypt
-		publicKey = self.manager.getPublicKey(node)
-		if publicKey is "":
-			return
-		enc_msg = self.crypto.encrypt(message, publicKey)
+		self.sender.try_to_send(message,node)
 
-		# Send
-		if self.sender.try_to_send(enc_msg,node['location']):
-			return
-
+		# TODO: Revisit this
 		# If not connection or disconnection, warn the user that there's no appropriate user
-		if ('connection' not in message['type'] and target is not None):
-			# Try to deactivate the node at this target (if it exists)
-			self.display.warn('mesh-chat application does not appear to exist at {0}'.format(node['location']))
-			self.manager.deactivate_node(node['location'])
+		#if ('connection' not in message['type'] and target is not None):
+		#	# Try to deactivate the node at this target (if it exists)
+		#	self.display.warn('mesh-chat application does not appear to exist at {0}'.format(node['location']))
+		#	self.manager.deactivate_node(node['location'])
 
 	def send_to_all(self,json,target_nodes):
 		'''
