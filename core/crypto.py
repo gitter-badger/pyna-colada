@@ -1,5 +1,6 @@
 import pickle, json, base64
 from Crypto.Cipher import AES
+from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 from Crypto import Random
 
@@ -19,7 +20,6 @@ class Crypto(object):
 		'''
 		Encrypt a message
 		'''
-
 		# prepare for AES
 		aes_rand = Random.new().read(32)
 		aes_iv_rand = Random.new().read(AES.block_size)
@@ -33,10 +33,13 @@ class Crypto(object):
 		# Now encrypt AES
 		aes_msg = aes_key.encrypt(str.encode(pre_msg))
 
-		#encrypt RSA
+		# Prepare PKCS1 1.5 Cipher
 		pubKey = RSA.importKey(pubKeyStr)
-		rsa_aes_key = pubKey.encrypt(aes_rand, None)[0]
-		rsa_aes_iv = pubKey.encrypt(aes_iv_rand, None)[0]
+		cipher = PKCS1_v1_5.new(pubKey)
+
+		# encrypt RSA
+		rsa_aes_key = cipher.encrypt(aes_rand)
+		rsa_aes_iv = cipher.encrypt(aes_iv_rand)
 
 		combined = rsa_aes_key + rsa_aes_iv + aes_msg
 		b64out  = base64.b64encode(combined)
@@ -56,8 +59,8 @@ class Crypto(object):
 		aes_msg = msg[512:]
 
 		# Gather the AES
-		aes_key_rand = self.private.decrypt(rsa_aes_key)
-		aes_iv = self.private.decrypt(rsa_aes_iv)
+		aes_key_rand = self.cipher.decrypt(rsa_aes_key,None)
+		aes_iv = self.cipher.decrypt(rsa_aes_iv,None)
 		aes_key = AES.new(aes_key_rand[:32],AES.MODE_CBC,aes_iv[:AES.block_size])
 
 		# strip out padding at the end and load as json
@@ -88,6 +91,8 @@ class Crypto(object):
 			self.display.log('Generating new keys...')
 			self.generateKeys()
 			self.display.log('Done.\n')
+
+		self.cipher = PKCS1_v1_5.new(self.private)
 
 	def saveKeys(self):
 		'''
