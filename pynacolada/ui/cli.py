@@ -1,5 +1,5 @@
 #import readline
-from core.processor import Processor
+from pynacolada.core.processor import Processor
 
 class CommandLineInterface(object):
 	'''This is the command line interface. It handles all user input and sends to the processor as necessary'''

@@ -1,5 +1,5 @@
 import socket, sys
-from core.node import Node
+from pynacolada.uinode import UINode
 
 try:
     # Get the local ip address
@@ -20,6 +20,6 @@ else:
     if port is "":
         port = 8080
 
-node = Node(alias,address,port)
+node = UINode(alias,address,port)
 
 node.start()

@@ -1,6 +1,6 @@
 import hashlib, json, os
-from core.packager import Packager
-from core.nodelist import NodeList
+from pynacolada.core.packager import Packager
+from pynacolada.core.nodelist import NodeList
 
 class Manager(object):
 	'''

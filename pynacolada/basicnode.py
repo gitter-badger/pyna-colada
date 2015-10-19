@@ -1,16 +1,16 @@
 import threading, time, json
-from core.listener import Listener
-from core.sender import Sender
-from core.display import Display
-from core.packager import Packager
-from core.interpreter import Interpreter
-from core.relay import Relay
-from core.cli import CommandLineInterface
-from core.manager import Manager
-from core.processor import Processor
-from core.crypto import Crypto
+from pynacolada.base.crypto import Crypto
+from pynacolada.base.display import Display
+from pynacolada.base.listener import Listener
+from pynacolada.base.sender import Sender
+from pynacolada.core.interpreter import Interpreter
+from pynacolada.core.manager import Manager
+from pynacolada.core.packager import Packager
+from pynacolada.core.processor import Processor
+from pynacolada.core.relay import Relay
+from pynacolada.ui.cli import CommandLineInterface
 
-class Node(object):
+class BasicNode(object):
 	'''Main PyNa Colada class. This initializes and handles threads for Pyna Colada'''
 
 	def __init__(self,alias,location,port):
@@ -38,7 +38,7 @@ class Node(object):
 		Build up all components in the node
 		'''
 		self.display = Display()
-		self.sender = Sender(self.display)
+		self.sender = Sender()
 		self.relay = Relay(self.sender,self.display,self.manager)
 		self.processor = Processor(self.relay,self.display, self.manager)
 		self.interpreter = Interpreter(self.processor,self.display,self.manager)

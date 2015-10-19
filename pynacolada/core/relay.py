@@ -1,6 +1,6 @@
 import json, sys, hashlib
-from core.packager import Packager
-from core.crypto import Crypto
+from pynacolada.core.packager import Packager
+from pynacolada.base.crypto import Crypto
 
 class Relay(object):
 	'''

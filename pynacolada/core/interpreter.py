@@ -1,12 +1,12 @@
 import json
-from core.crypto import Crypto
+from pynacolada.base.crypto import Crypto
 
 class Interpreter(object):
 	def __init__(self, processor, display, manager):
 		self.display = display
 		self.manager = manager
 		self.processor = processor
-		
+
 	# Handles receipt of the actual json we take in
 	def interpretMessage(self,enc_msg):
 		'''

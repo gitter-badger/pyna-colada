@@ -1,15 +1,13 @@
 import json, socket, sys, requests,threading
-from core.display import Display
 
-# Main client class
 class Sender(object):
     '''Socket Sender; responsible ONLY for sending messages on an anonymous port'''
-    def __init__(self,display):
-        self.display = display
 
     # Try to send over socket
     def try_to_send(self, message,target):
-        '''Wrapper for sending on a socket; boolean indicates successful send'''
+        '''
+        Wrapper for sending on a socket; boolean indicates successful send
+        '''
         location, port = target.split(':')
         sender_thread = threading.Thread(target=self.send,args=(message,location,port,))
         sender_thread.daemon = True
@@ -26,5 +24,5 @@ class Sender(object):
                 payload = {"message" : message}
                 url = 'http://{0}:{1}'.format(location, port)
                 r = requests.post(url, json=payload, headers=headers, timeout=1.0)
-                
+
         except: pass
