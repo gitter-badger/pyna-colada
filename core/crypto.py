@@ -1,5 +1,7 @@
-import pickle, rsa, json, base64
+import pickle, json, base64
 from Crypto.Cipher import AES
+from Crypto.PublicKey import RSA
+from Crypto import Random
 
 class Crypto(object):
 	'''
@@ -11,7 +13,7 @@ class Crypto(object):
 		self.loadKeys()
 
 	def getPublic(self):
-		return self.public.save_pkcs1()
+		return self.private.publickey().exportKey('PEM')
 
 	def encrypt(self, msg, pubKeyStr):
 		'''
@@ -19,8 +21,8 @@ class Crypto(object):
 		'''
 
 		# prepare for AES
-		aes_rand = rsa.randnum.read_random_bits(256)
-		aes_iv_rand = rsa.randnum.read_random_bits(128)
+		aes_rand = Random.new().read(32)
+		aes_iv_rand = Random.new().read(AES.block_size)
 		aes_key = AES.new(aes_rand,AES.MODE_CBC,aes_iv_rand)
 		pre_msg = str(json.dumps(msg))
 
@@ -32,9 +34,9 @@ class Crypto(object):
 		aes_msg = aes_key.encrypt(str.encode(pre_msg))
 
 		#encrypt RSA
-		pubKey = rsa.PublicKey.load_pkcs1(pubKeyStr.encode('utf-8'))
-		rsa_aes_key = rsa.encrypt(aes_rand, pubKey)
-		rsa_aes_iv = rsa.encrypt(aes_iv_rand, pubKey)
+		pubKey = RSA.importKey(pubKeyStr)
+		rsa_aes_key = pubKey.encrypt(aes_rand, None)[0]
+		rsa_aes_iv = pubKey.encrypt(aes_iv_rand, None)[0]
 
 		combined = rsa_aes_key + rsa_aes_iv + aes_msg
 		b64out  = base64.b64encode(combined)
@@ -45,11 +47,8 @@ class Crypto(object):
 		'''
 		Decrypt a message
 		'''
-		#print('js:  {0}'.format(js))
 		jsdec = js.decode('utf-8', errors="ignore")
-		#print('jsdec:  ' + jsdec)
 		jsmsg = json.loads(jsdec.strip())
-		#print('jsmsg:  ' + jsmsg)
 		msg = base64.b64decode(jsmsg['message'])
 
 		rsa_aes_key = msg[:256]
@@ -57,9 +56,9 @@ class Crypto(object):
 		aes_msg = msg[512:]
 
 		# Gather the AES
-		aes_key_rand = rsa.decrypt(rsa_aes_key, self.private)
-		aes_iv = rsa.decrypt(rsa_aes_iv,self.private)
-		aes_key = AES.new(aes_key_rand[:32],AES.MODE_CBC,aes_iv[:16])
+		aes_key_rand = self.private.decrypt(rsa_aes_key)
+		aes_iv = self.private.decrypt(rsa_aes_iv)
+		aes_key = AES.new(aes_key_rand[:32],AES.MODE_CBC,aes_iv[:AES.block_size])
 
 		# strip out padding at the end and load as json
 		dec_pre_strip = aes_key.decrypt(aes_msg)
@@ -73,10 +72,9 @@ class Crypto(object):
 		'''
 		Generate new RSA-2048 keys for this client (accurate off)
 		'''
-		(public,private) = rsa.newkeys(2048,accurate=False)
-		self.saveKeys(public,private)
-		self.public = public
-		self.private = private
+		self.private = RSA.generate(2048)
+		#(public,private) = rsa.newkeys(2048,accurate=False)
+		self.saveKeys()
 
 	def loadKeys(self):
 		'''
@@ -85,17 +83,18 @@ class Crypto(object):
 		try:
 			with open('config/key.pyna','rb') as key:
 				data = pickle.load(key)
-				self.public = rsa.PublicKey.load_pkcs1(data['publicKey'])
-				self.private = rsa.PrivateKey.load_pkcs1(data['privateKey'])
+				self.private = RSA.importKey(data['privateKey'])
 		except:
 			self.display.log('Generating new keys...')
 			self.generateKeys()
 			self.display.log('Done.\n')
 
-	def saveKeys(self,public,private):
+	def saveKeys(self):
 		'''
 		Save public and private key to key.json
 		'''
-		data = {"publicKey":public.save_pkcs1(),"privateKey":private.save_pkcs1()}
+		privout = self.private.exportKey('PEM').decode('utf-8')
+		data = {"privateKey":privout}
+
 		with open('config/key.pyna','wb') as auth:
 			pickle.dump(data, auth)

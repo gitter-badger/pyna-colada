@@ -6,6 +6,7 @@ class Interpreter(object):
 		self.display = display
 		self.manager = manager
 		self.processor = processor
+		
 	# Handles receipt of the actual json we take in
 	def interpretMessage(self,enc_msg):
 		'''

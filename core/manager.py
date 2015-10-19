@@ -1,4 +1,4 @@
-import hashlib, json
+import hashlib, json, os
 from core.packager import Packager
 from core.nodelist import NodeList
 
@@ -19,10 +19,18 @@ class Manager(object):
 		'''
 		Load all configuration settings and nodes
 		'''
+		if not os.path.isfile('config/config.json'):
+			self.createConfig()
+
 		config = json.load(open('config/config.json','r'))
 		self.version = config['version']
 		self.uid = config['uid']
 		self.node_list.load()
+
+	def createConfig(self):
+		data = {"version": "0.4.6","name": "Py\u00d1a Colada","uid": "Anonymous"}
+		with open('config/config.json','w') as config:
+			json.dump(data, config)
 
 	def importNode(self,filename):
 		'''
