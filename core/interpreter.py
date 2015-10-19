@@ -13,7 +13,9 @@ class Interpreter(object):
 		'''
 		# add this server to our list since we know it's real
 		msg = self.crypto.decrypt(enc_msg)
-		#self.display.debug('{0} received\n{1}'.format(msg['type'],msg))
+
+		self.display.debug('{0} received\n{1}'.format(msg['type'],msg))
+
 		need_to_nlh = self.check_node_status(msg['sender'])
 		self.handleMessageType(msg)
 		if need_to_nlh:

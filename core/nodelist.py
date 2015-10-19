@@ -60,7 +60,7 @@ class NodeList(object):
 		'''
 		Straightforward; dumps to JSON
 		'''
-		return json.dumps({"nodes":self.authorized_nodes})
+		return self.authorized_nodes
 
 	def matchTo(self, criterion):
 		'''
@@ -78,13 +78,12 @@ class NodeList(object):
 		vals = [node.values() for node in self.authorized_nodes]
 		return criterion in [y for v in vals for y in v]
 
-	def diff(self,node_list_json):
+	def diff(self,node_list):
 		'''
 		add uniques to our list, then return a list unique to sender
 		'''
-		node_list = json.loads(node_list_json)
-		self.addList(node_list['nodes'])
-		return [node for node in self.authorized_nodes if node not in node_list['nodes']]
+		self.addList(node_list)
+		return [node for node in self.authorized_nodes if node not in node_list]
 
 	def isAuthorized(self,node):
 		'''
