@@ -1,8 +1,8 @@
-import json, socket, time, sys,cgi,urllib
+import socket, sys
 from pynacolada.base.TCPServer import TCPServer
 from pynacolada.base.HttpServer import HttpServer
+from pynacolada.base.display import Display
 
-# Main server clas
 class Listener(object):
     '''
     Http Server parent class; responsible for creating, binding, and listening
@@ -22,7 +22,7 @@ class Listener(object):
             httpd.serve_forever()
         except socket.error as msg:
             # No dice. Kill the process.
-            print('ERROR: Unable to bind socket: {0}'.format(msg))
+            Display.warn('ERROR: Unable to bind socket: {0}'.format(msg))
             sys.exit(0)
 
     def interpret(self, encrypted):

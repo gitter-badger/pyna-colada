@@ -3,14 +3,14 @@ from Crypto.Cipher import AES
 from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 from Crypto import Random
+from pynacolada.base.display import Display
 
 class Crypto(object):
 	'''
 	Sole component of RSA encryption and decryption
 	'''
 
-	def __init__(self,display):
-		self.display = display
+	def __init__(self):
 		self.loadKeys()
 
 	def getPublic(self):
@@ -88,9 +88,9 @@ class Crypto(object):
 				data = pickle.load(key)
 				self.private = RSA.importKey(data['privateKey'])
 		except:
-			self.display.log('Generating new keys...')
+			Display.log('Generating new keys...')
 			self.generateKeys()
-			self.display.log('Done.\n')
+			Display.log('Done.\n')
 
 		self.cipher = PKCS1_v1_5.new(self.private)
 

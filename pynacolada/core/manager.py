@@ -28,7 +28,7 @@ class Manager(object):
 		self.node_list.load()
 
 	def createConfig(self):
-		data = {"version": "0.4.6","name": "Py\u00d1a Colada","uid": "Anonymous"}
+		data = {"version": "0.5.0","name": "Py\u00d1a Colada","uid": "Anonymous"}
 		with open('config/config.json','w') as config:
 			json.dump(data, config)
 

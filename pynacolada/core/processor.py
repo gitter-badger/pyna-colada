@@ -5,18 +5,19 @@ from pynacolada.core.manager import Manager
 
 class Processor(object):
 	'''Controls the behavior of commands that need to be displayed or sent out'''
-	def __init__(self, relay, display, manager):
+	def __init__(self, relay, manager):
 		self.relay = relay
-		self.display = display
 		self.manager = manager
 		self.packager = manager.create_packager()
+		self.about()
 
 	def about(self):
-		self.display.pyna_colada(self.manager.version)
-		self.display.info('A mesh-chat type application written by Evan Kirsch (2015)\n')
+		bold_name = Display.bold('PyÑa Colada', Display.color.pyna_colada)
+		Display.server_announce('{0} Node v{1}'.format(bold_name, self.manager.version))
+		Display.info('A mesh-chat type application written by Evan Kirsch (2015)\n')
 
 	def exit(self):
-		self.display.server_announce('Closing down node. Thank you for using PyÑa Colada!')
+		Display.server_announce('Closing down node. Thank you for using PyÑa Colada!')
 		self.broadcast('disconnection')
 		sys.exit(0)
 
@@ -28,10 +29,9 @@ class Processor(object):
 		self.whisper(message,self.manager.most_recent_whisperer)
 
 	def identity(self,key):
-		# if this is an alias
 		user = self.manager.getNode(key)
 		if user is None:
-			self.display.info('No user or node was found with key \'{0}\''.format(key))
+			Display.info('No user or node was found with key \'{0}\''.format(key))
 			return
 		self.info(user)
 
@@ -43,18 +43,15 @@ class Processor(object):
 		if new_node is not None:
 			self.full_node_list(new_node)
 			return
-		self.display.warn('Malformed or missing file \'{0}\''.format(filename))
+		Display.warn('Malformed or missing file \'{0}\''.format(filename))
 
 	def who(self):
 		if len(self.manager.active_nodes) == 0:
-			self.display.info('No nodes are active')
+			Display.info('No nodes are active')
 			return
-		self.display.log('Active users')
+		Display.log('Active users')
 		for node in self.manager.active_nodes:
-			self.info(node)
-
-	def info(self,node):
-		self.display.info("{2}:  {0} ({1})".format(node['alias'],node['uid'],node['location']))
+			Display.info("{2}:  {0} ({1})".format(node['alias'],node['uid'],node['location']))
 
 	def node_list_hash(self,target):
 		hashed = self.manager.get_node_hash()
@@ -64,9 +61,6 @@ class Processor(object):
 	def full_node_list(self,target):
 		node_list = self.manager.get_node_list()
 		self.send('nodelist',target,node_list)
-
-	def node_list_diff(self,node_list,target):
-		self.send('nodelistdiff',target,node_list)
 
 	def send(self,type,target,content=''):
 		packaged_json = self.packager.pack(type,content)

@@ -1,14 +1,14 @@
 import json, sys, hashlib
 from pynacolada.core.packager import Packager
 from pynacolada.base.crypto import Crypto
+from pynacolada.base.display import Display
 
 class Relay(object):
 	'''
 	Responsible for preparing everything before it is sent. Will include an outbox queue later
 	'''
-	def __init__(self,sender,display,manager):
+	def __init__(self,sender,manager):
 		self.sender = sender
-		self.display = display
 		self.manager = manager
 
 	def send_message(self,message,target):
@@ -19,7 +19,7 @@ class Relay(object):
 		node = self.manager.getNode(target)
 		if node is None:
 			# Erroneous; no user exists here
-			self.display.warn('No user was found')
+			Display.warn('No user was found')
 			return
 
 		self.sender.try_to_send(message,node)

@@ -1,10 +1,6 @@
 class Display(object):
 	'''Anything which displays to the user should go through Display()'''
 
-	def __init__(self,debug=False):
-		self.debug_mode = debug
-
-
 	class color:
 		'''Collection of colors for color_print'''
 		header = '\033[96m'
@@ -18,11 +14,11 @@ class Display(object):
 		end = '\033[0m'
 		bold = '\033[1m'
 
-	def color_print(self,message,printed_color):
+	def color_print(message,printed_color):
 		'''Formats a message with a specific color (as Display.color)'''
-		print(printed_color + message + self.color.end)
+		print(printed_color + message + Display.color.end)
 
-	def display(self,msg):
+	def display(msg):
 		'''Display a message received according to the type'''
 		# Scrape out info
 		sender_tag = msg['sender']['alias']
@@ -30,43 +26,41 @@ class Display(object):
 		sent_at = msg['time_sent']
 		# If this is a whisper, format as blue
 		if msg['type'] == 'whisper':
-			self.whisper(sender_tag,message)
+			Display.whisper(sender_tag,message)
 		# otherwise, if chat, format normally
 		if msg['type'] == 'chat':
-			self.chat(sender_tag,message)
+			Display.chat(sender_tag,message)
 
-	def chat(self, sender_tag,message, chat_color=color.gray):
+	def chat(sender_tag,message, chat_color=None):
 		'''Display a message with formatting for chat; can be formatted with a specific color if desired'''
-		sender_tag = self.bold(sender_tag,chat_color)
-		self.color_print("{0}: {1}".format(sender_tag, message),chat_color)
+		if chat_color is None:
+			chat_color = Display.color.gray
+		sender_tag = Display.bold(sender_tag,chat_color)
+		Display.color_print("{0}: {1}".format(sender_tag, message),chat_color)
 
-	def whisper(self, sender_tag,message):
+	def whisper(sender_tag,message):
 		'''Display a chat message in clue with the <W> tag attached'''
 		sender_tag = sender_tag + ' <W>'
-		self.chat(sender_tag,message,Display.color.blue)
+		Display.chat(sender_tag,message,Display.color.blue)
 
-	def disconnected(self, alias, location):
+	def disconnected(alias, location):
 		'''Inform the user that someone has disconnected'''
-		self.info('{0} ({1}) has disconnected'.format(alias,location))
+		Display.info('{0} ({1}) has disconnected'.format(alias,location))
 
-	def log(self, message):
-		self.color_print(message,self.color.green)
-	def debug(self, message):
-		self.color_print(message,self.color.blue)
-	def warn(self, message):
-		self.color_print(message,self.color.warn)
-	def error(self, message):
-		self.color_print(message,self.color.fail)
-	def info(self, message):
-		self.color_print(message,self.color.dark_gray)
-	def server_announce(self, message):
-		self.color_print(message, self.color.pyna_colada)
+	def log(message):
+		Display.color_print(message,Display.color.green)
+	def debug(message):
+		Display.color_print(message,Display.color.blue)
+	def warn(message):
+		Display.color_print(message,Display.color.warn)
+	def error(message):
+		Display.color_print(message,Display.color.fail)
+	def info(message):
+		Display.color_print(message,Display.color.dark_gray)
+	def server_announce(message):
+		Display.color_print(message, Display.color.pyna_colada)
 
 	# surrounds part of the message with tags that make it bold
-	def bold(self,message, color_after):
+	def bold(message, color_after):
 		# insert bold tag, end tag, and color_after
-		return self.color.bold + message + self.color.end + color_after
-
-	def pyna_colada(self, version):
-		name = self.bold('PyÑa Colada', self.color.pyna_colada)
-		self.server_announce('{0} Node v{1}'.format(name, version))
+		return Display.color.bold + message + Display.color.end + color_after

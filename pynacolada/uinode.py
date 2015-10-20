@@ -26,8 +26,7 @@ class UINode(object):
 		self.start_up_listener()
 
 		# Provide information to user and other clients (the latter via ping)
-		self.display.pyna_colada(self.manager.version)
-		self.display.log('Node running on {0}:{1}\n'.format(self.location,self.port))
+		Display.log('Node running on {0}:{1}\n'.format(self.location,self.port))
 		self.processor.broadcast('ping',targets=self.manager.node_list.authorized_nodes)
 
 		# Await initialization before starting client thread
@@ -40,16 +39,18 @@ class UINode(object):
 		Build up all components in the node
 		'''
 		# Base Components
-		self.display = Display()
-		self.crypto = Crypto(self.display)
+		self.crypto = Crypto()
 		self.sender = Sender(self.crypto)
 
-		self.relay = Relay(self.sender,self.display,self.manager)
-		self.processor = Processor(self.relay,self.display, self.manager)
-		self.interpreter = Interpreter(self.processor,self.display,self.manager)
-		self.cli = CommandLineInterface(self.processor,self.display)
+		# Core Pyna Colada Components
+		self.relay = Relay(self.sender,self.manager)
+		self.processor = Processor(self.relay, self.manager)
+		self.interpreter = Interpreter(self.processor,self.manager)
 
-		# Crypto
+		# UI
+		self.cli = CommandLineInterface(self.processor)
+
+		# Listener (since it requires an interpreter)
 		self.listener = Listener(self.crypto,self.interpreter)
 		self.export()
 

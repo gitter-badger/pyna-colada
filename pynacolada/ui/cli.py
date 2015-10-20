@@ -1,11 +1,11 @@
 #import readline
 from pynacolada.core.processor import Processor
+from pynacolada.base.display import Display
 
 class CommandLineInterface(object):
 	'''This is the command line interface. It handles all user input and sends to the processor as necessary'''
-	def __init__(self,processor,display):
+	def __init__(self,processor):
 		self.processor = processor
-		self.display = display
 #		readline.parse_and_bind('tab: complete')
 
 	# Waits for input from the user, then sends it off to be handled
@@ -76,7 +76,7 @@ class CommandLineInterface(object):
 				index_of_space = message.index(' ')
 				return message[:index_of_space], message[index_of_space+1:]
 			except:
-				self.display.warn('Cannot send a whisper without a message.')
+				Display.warn('Cannot send a whisper without a message.')
 				return "",""
-		self.display.warn('Improper target or message format.')
+		Display.warn('Improper target or message format.')
 		return "",""
