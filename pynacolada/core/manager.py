@@ -1,6 +1,7 @@
 import hashlib, json, os
 from pynacolada.core.packager import Packager
 from pynacolada.core.nodelist import NodeList
+from pynacolada.base.display import Display
 
 class Manager(object):
 	'''
@@ -100,6 +101,22 @@ class Manager(object):
 		if matched is not None:
 			public = matched['publicKey']
 		return public
+
+	def isActive(self,node):
+		if node['location'] == self.location:
+			return True
+
+		# Look up the full node details from our authorized nodes
+		true_node = self.node_list.matchTo(node)
+		return (true_node in self.active_nodes and true_node is not None)
+
+	def isAuthorized(self,node):
+		if node['location'] == self.location:
+			return True
+
+		# Look up the full node details from our authorized nodes
+		true_node = self.node_list.matchTo(node)
+		return true_node is not None
 
 	# remove an ip location (location) from active_node_list and its aliases
 	def deactivate_node(self, key):

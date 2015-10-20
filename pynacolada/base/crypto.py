@@ -28,10 +28,9 @@ class Crypto(object):
 
 		# Pad the msg
 		length = 16 - (len(pre_msg) % 16)
-		pre_msg += " "*length
 
 		# Now encrypt AES
-		aes_msg = aes_key.encrypt(str.encode(pre_msg))
+		aes_msg = aes_key.encrypt(str.encode(pre_msg) + bytes([length])*length)
 
 		# Prepare PKCS1 1.5 Cipher
 		pubKey = RSA.importKey(pubKeyStr)
@@ -40,9 +39,9 @@ class Crypto(object):
 		# encrypt RSA
 		rsa_aes_key = cipher.encrypt(aes_rand)
 		rsa_aes_iv = cipher.encrypt(aes_iv_rand)
-
 		combined = rsa_aes_key + rsa_aes_iv + aes_msg
 		b64out  = base64.b64encode(combined)
+
 		return b64out.decode()
 
 

@@ -45,13 +45,16 @@ class Processor(object):
 			return
 		Display.warn('Malformed or missing file \'{0}\''.format(filename))
 
+	def info(self,node):
+		Display.info("{2}:  {0} ({1})".format(node['alias'],node['uid'],node['location']))
+
 	def who(self):
 		if len(self.manager.active_nodes) == 0:
 			Display.info('No nodes are active')
 			return
 		Display.log('Active users')
 		for node in self.manager.active_nodes:
-			Display.info("{2}:  {0} ({1})".format(node['alias'],node['uid'],node['location']))
+			self.info(node)
 
 	def node_list_hash(self,target):
 		hashed = self.manager.get_node_hash()

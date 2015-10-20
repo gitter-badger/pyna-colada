@@ -84,7 +84,9 @@ class NodeList(object):
 		Checks to see if an authorized node meets a given criterion
 		'''
 		matches = [node for node in self.authorized_nodes if criterion in node.values()]
-		return matches[0]
+		if len(matches) > 0:
+			return matches[0]
+		return None
 
 	def exists(self,criterion):
 		'''

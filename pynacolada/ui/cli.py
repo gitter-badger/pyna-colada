@@ -1,4 +1,4 @@
-#import readline
+import readline
 from pynacolada.core.processor import Processor
 from pynacolada.base.display import Display
 
@@ -6,7 +6,7 @@ class CommandLineInterface(object):
 	'''This is the command line interface. It handles all user input and sends to the processor as necessary'''
 	def __init__(self,processor):
 		self.processor = processor
-#		readline.parse_and_bind('tab: complete')
+		readline.parse_and_bind('tab: complete')
 
 	# Waits for input from the user, then sends it off to be handled
 	def __running__(self):

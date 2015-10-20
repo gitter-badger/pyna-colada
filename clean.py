@@ -10,6 +10,13 @@ if len(json_files) > 0:
     for f in json_files:
         os.remove(f)
 
+# Remove keys
+#json_files = [f for f in os.listdir('config') if '.pyna' in f]
+#if len(json_files) > 0:
+#    Display.warn('Purging {0} Pyna Key files'.format(len(json_files)))
+#    for f in json_files:
+#        os.remove(f)
+
 # Clean node list
 Display.warn('Cleaning nodes.json')
 with open('config/nodes.json','w') as nodelistconfig:

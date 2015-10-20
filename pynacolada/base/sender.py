@@ -1,4 +1,5 @@
 import json, socket, sys, requests,threading
+from pynacolada.base.display import Display
 
 class Sender(object):
     '''Socket Sender; responsible ONLY for sending messages on an anonymous port'''
@@ -12,8 +13,6 @@ class Sender(object):
         Wrapper for sending on a socket; boolean indicates successful send
         Argument "target_node" MUST be a node
         '''
-        #print(target_node)
-
         # Gather the target's location and port
         location, port = target_node['location'].split(':')
 
