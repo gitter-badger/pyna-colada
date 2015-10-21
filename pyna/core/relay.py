@@ -1,7 +1,7 @@
 import json, sys, hashlib
-from pynacolada.core.packager import Packager
-from pynacolada.base.crypto import Crypto
-from pynacolada.base.display import Display
+from pyna.core.packager import Packager
+from pyna.base.crypto import Crypto
+from pyna.base.display import Display
 
 class Relay(object):
 	'''

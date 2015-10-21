@@ -1,6 +1,6 @@
 import json
-from pynacolada.base.crypto import Crypto
-from pynacolada.base.display import Display
+from pyna.base.crypto import Crypto
+from pyna.base.display import Display
 
 class Interpreter(object):
 	def __init__(self, processor, manager):
@@ -27,7 +27,7 @@ class Interpreter(object):
 
 		if msg['type'] == 'ping':
 			# May not always work (in the handshakes)
-			self.processor.send("pingReply",sender['location'])
+			self.processor.send("pingreply",sender['location'])
 			return
 		if msg['type'] == 'disconnection':
 			self.manager.deactivate_node(sender)
@@ -38,6 +38,7 @@ class Interpreter(object):
 			return
 		if msg['type'] == 'whisper':
 			self.manager.most_recent_whisperer = sender['alias']
+
 		Display.display(msg)
 
 	def interpret_node_list(self,msg,sender):
@@ -48,14 +49,14 @@ class Interpreter(object):
 
 		if msg['type'] == 'nodelistdiff':
 			diffed_nodes = self.manager.node_list.addList(msg['message'])
-			self.processor.broadcast('nodelisthash',content=self.manager.get_node_hash(),targets=diffed_nodes)
+			self.processor.broadcast('ping',content=self.manager.get_node_hash(),targets=diffed_nodes)
 			return
 
 		if msg['type'] == 'nodelist':
 			unique_to_sender = self.manager.node_list.diff(msg['message'])
 			if len(unique_to_sender) > 0:
 				self.processor.send('nodelistdiff',sender,content=unique_to_sender)
-			self.processor.broadcast('nodelisthash',content=self.manager.get_node_hash(),targets=self.manager.node_list.authorized_nodes)
+			self.processor.broadcast('ping',content=self.manager.get_node_hash(),targets=self.manager.node_list.authorized_nodes)
 			return
 
 	# For new connections

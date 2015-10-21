@@ -1,12 +1,20 @@
 import readline
-from pynacolada.core.processor import Processor
-from pynacolada.base.display import Display
-
+from pyna.core.processor import Processor
+from pyna.base.display import Display
 class CommandLineInterface(object):
 	'''This is the command line interface. It handles all user input and sends to the processor as necessary'''
 	def __init__(self,processor):
 		self.processor = processor
+		#readline.set_completer(self.autocomplete)
 		readline.parse_and_bind('tab: complete')
+
+	def autocomplete(text, state):
+		commands = ['/w ','/all ','/import ','/exit','/r','/ping','/pingall','/about','/who','/?']
+		options = [i for i in commands if i.startswith(text)]
+		if state < len(options):
+			return options[state]
+		else:
+			return None
 
 	# Waits for input from the user, then sends it off to be handled
 	def __running__(self):

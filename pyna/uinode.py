@@ -1,14 +1,14 @@
 import threading, time, json
-from pynacolada.base.crypto import Crypto
-from pynacolada.base.display import Display
-from pynacolada.base.listener import Listener
-from pynacolada.base.sender import Sender
-from pynacolada.core.interpreter import Interpreter
-from pynacolada.core.manager import Manager
-from pynacolada.core.packager import Packager
-from pynacolada.core.processor import Processor
-from pynacolada.core.relay import Relay
-from pynacolada.ui.cli import CommandLineInterface
+from pyna.base.crypto import Crypto
+from pyna.base.display import Display
+from pyna.base.listener import Listener
+from pyna.base.sender import Sender
+from pyna.core.interpreter import Interpreter
+from pyna.core.manager import Manager
+from pyna.core.packager import Packager
+from pyna.core.processor import Processor
+from pyna.core.relay import Relay
+from pyna.ui.cli import CommandLineInterface
 
 class UINode(object):
 	'''Main PyNa Colada class. This initializes and handles threads for Pyna Colada'''

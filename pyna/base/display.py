@@ -1,3 +1,5 @@
+import os
+
 class Display(object):
 	'''Anything which displays to the user should go through Display()'''
 
@@ -31,10 +33,12 @@ class Display(object):
 
 		# If this is a whisper, format as blue
 		if msg['type'] == 'whisper':
+			os.system("notify-send '{1}' '<W>: {0}'".format(message,sender_tag))
 			Display.whisper(sender_tag,message)
 
 		# otherwise, if chat, format normally
 		if msg['type'] == 'chat':
+			os.system("notify-send '{1}' '{0}'".format(message,sender_tag))
 			Display.chat(sender_tag,message, bold_color=client_bold)
 
 	def getClientSpecificBold(client):

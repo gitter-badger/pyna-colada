@@ -12,7 +12,7 @@
 		"pingall": "/pingall",
 		"info": "/? ",
 		"who": "/who",
-		"authorize": "/auth ",
+		"import": "/import",
 		"exit": "/exit"
 	}
 }

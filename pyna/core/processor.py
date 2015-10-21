@@ -1,7 +1,7 @@
 import sys
-from pynacolada.core.relay import Relay
-from pynacolada.base.display import Display
-from pynacolada.core.manager import Manager
+from pyna.core.relay import Relay
+from pyna.base.display import Display
+from pyna.core.manager import Manager
 
 class Processor(object):
 	'''Controls the behavior of commands that need to be displayed or sent out'''

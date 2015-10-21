@@ -1,7 +1,7 @@
 import hashlib, json, os
-from pynacolada.core.packager import Packager
-from pynacolada.core.nodelist import NodeList
-from pynacolada.base.display import Display
+from pyna.core.packager import Packager
+from pyna.core.nodelist import NodeList
+from pyna.base.display import Display
 
 class Manager(object):
 	'''

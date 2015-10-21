@@ -1,5 +1,5 @@
 import json, socket, sys, requests,threading
-from pynacolada.base.display import Display
+from pyna.base.display import Display
 
 class Sender(object):
     '''Socket Sender; responsible ONLY for sending messages on an anonymous port'''

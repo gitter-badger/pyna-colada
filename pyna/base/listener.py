@@ -1,7 +1,7 @@
 import socket, sys
-from pynacolada.base.TCPServer import TCPServer
-from pynacolada.base.HttpServer import HttpServer
-from pynacolada.base.display import Display
+from pyna.base.TCPServer import TCPServer
+from pyna.base.HttpServer import HttpServer
+from pyna.base.display import Display
 
 class Listener(object):
     '''
