@@ -14,6 +14,8 @@ class Manager(object):
 		self.most_recent_whisperer = None
 		self.location = '{0}:{1}'.format(location,port)
 		self.node_list = NodeList()
+		self.default_command = 'chat'
+		self.whisper_lock_target = ''
 		self.load()
 
 	def load(self):
@@ -27,6 +29,18 @@ class Manager(object):
 		self.version = config['version']
 		self.getUid()
 		self.node_list.load()
+
+	def whisperToggle(self, target):
+		'''Toggles between whispering and all chatting as default command'''
+		if self.default_command == 'chat':
+			self.default_command = 'whisperlock'
+			if target is '':
+				target = self.most_recent_whisperer
+			self.whisper_lock_target = target
+			return
+
+		self.default_command = 'chat'
+
 
 	def getBindings(self):
 		config = json.load(open('config/config.json','r'))
@@ -43,6 +57,16 @@ class Manager(object):
 			users[self.alias] = self.uid
 			with open('config/users.json','w') as out:
 				json.dump(users, out)
+
+	def addToBlackList(self, target, message):
+		node = self.getNode(target)
+		if node is '':
+			return
+
+		b = json.load(open('config/blacklist.json','r'))
+		b[node['location']] = message
+		with open('config/blacklist.json','w') as blacklist:
+			json.dump(b, blacklist)
 
 	def generateUid(self, size=6, chars=string.ascii_uppercase + string.digits):
 		return ''.join(random.choice(chars) for x in range(size))

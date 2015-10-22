@@ -1,5 +1,5 @@
 {
 	"version": "0.6.0",
 	"name": "Py\u00d1a Colada",
-	"bindings": {"chat": "/all",	"whisper": "/w",	"whisperToggle": "/wt","reply": "/r","ban": "/ban","ping": "/ping","pingall": "/pingall","identity": "/?","who": "/who","import": "/import", "exit": "/exit"	}
+	"bindings": {"chat": "/all",	"whisper": "/w",	"whispertoggle": "/wt","reply": "/r","ban": "/ban","ping": "/ping","pingall": "/pingall","identity": "/?","who": "/who","import": "/import", "exit": "/exit"	}
 }

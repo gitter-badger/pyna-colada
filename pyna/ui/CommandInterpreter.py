@@ -1,7 +1,7 @@
 from pyna.base.Interpreter import Interpreter
 from pyna.core.Dispatcher import Dispatcher
 from pyna.ui.PynaDisplay import PynaDisplay
-import sys, time
+import sys, time, json
 
 class CommandInterpreter(Interpreter):
     def __init__(self, manager, dispatcher):
@@ -27,6 +27,9 @@ class CommandInterpreter(Interpreter):
 
     def typed_reply(self, message):
         self.dispatcher.send('whisper',content=message, target=self.manager.most_recent_whisperer)
+
+    def typed_whisperlock(self, message):
+        self.dispatcher.send('whisper',content=message, target=self.manager.whisper_lock_target)
 
     def typed_info(self,key): #TODO: Move to display
         user = self.manager.getNode(key)
@@ -60,6 +63,18 @@ class CommandInterpreter(Interpreter):
 
     def typed_chat(self,msg):
         self.dispatcher.broadcast('chat', content=msg)
+
+    def typed_ban(self, remainder):
+        try:
+            target, message = remainder.split(' ',1)
+        except:
+            PynaDisplay.warn("Erroneous ban command: Please specify target and reason")
+            return
+        self.manager.addToBlackList(target,message)
+
+    def typed_whispertoggle(self, remainder):
+        target = remainder.split(' ',1)[0]
+        self.manager.whisperToggle(target)
 
     # Helpful commands
     def identity(self,node):

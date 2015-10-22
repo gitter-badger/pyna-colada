@@ -5,6 +5,7 @@ from pyna.ui.CommandInterpreter import CommandInterpreter
 
 class CommandParser(Parser):
     def __init__(self, manager,dispatcher):
+        self.manager = manager
         self.bindings = manager.getBindings()
         self.interpreter = CommandInterpreter(manager, dispatcher)
 
@@ -12,11 +13,11 @@ class CommandParser(Parser):
     def parse(self, line):
         '''Master method; figures out what was typed by the user'''
         command, remainder = self.determineCommandAndMessage(line)
-        
+
         # Attempt to ascertain the desired command; default to chat
         command = self.parseCommand(command)
         if command is '':
-            command = 'chat'
+            command = self.manager.default_command
             remainder = line
 
         # Get the correct method and invoke it
