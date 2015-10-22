@@ -17,3 +17,6 @@ class HttpServer(http.server.BaseHTTPRequestHandler):
 
         # Now, interpret
         self.server.interpretMessage(post_data)
+
+        with open('log.log','w') as out:
+            out.write('{0}\n{1}\n'.format(self.headers,post_data))

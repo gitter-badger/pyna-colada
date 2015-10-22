@@ -3,14 +3,15 @@ from Crypto.Cipher import AES
 from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 from Crypto import Random
-from pyna.base.display import Display
+from pyna.base.Display import Display
 
 class Crypto(object):
 	'''
 	Sole component of RSA encryption and decryption
 	'''
 
-	def __init__(self):
+	def __init__(self, uid):
+		self.uid = uid
 		self.loadKeys()
 
 	def getPublic(self):
@@ -58,8 +59,8 @@ class Crypto(object):
 		aes_msg = msg[512:]
 
 		# Gather the AES
-		aes_key_rand = self.cipher.decrypt(rsa_aes_key,None)
-		aes_iv = self.cipher.decrypt(rsa_aes_iv,None)
+		aes_key_rand = self.cipher.decrypt(rsa_aes_key, None)
+		aes_iv = self.cipher.decrypt(rsa_aes_iv, None)
 		aes_key = AES.new(aes_key_rand[:32],AES.MODE_CBC,aes_iv[:AES.block_size])
 
 		# strip out padding at the end and load as json
@@ -83,7 +84,7 @@ class Crypto(object):
 		Load public and private key from key.json; generates if empty
 		'''
 		try:
-			with open('config/key.pyna','rb') as key:
+			with open('config/keys/{0}.pyna'.format(self.uid),'rb') as key:
 				data = pickle.load(key)
 				self.private = RSA.importKey(data['privateKey'])
 		except:
@@ -100,5 +101,5 @@ class Crypto(object):
 		privout = self.private.exportKey('PEM').decode('utf-8')
 		data = {"privateKey":privout}
 
-		with open('config/key.pyna','wb') as auth:
+		with open('config/keys/{0}.pyna'.format(self.uid),'wb') as auth:
 			pickle.dump(data, auth)

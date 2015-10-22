@@ -1,16 +1,19 @@
 import socket, sys
 from pyna.base.TCPServer import TCPServer
 from pyna.base.HttpServer import HttpServer
-from pyna.base.display import Display
+from pyna.base.Display import Display
 
 class Listener(object):
     '''
     Http Server parent class; responsible for creating, binding, and listening
     '''
 
-    def __init__(self, crypto, message_interpreter):
+    def __init__(self, crypto, parser=None):
         self.crypto = crypto
-        self.message_interpreter = message_interpreter
+        self.parser = parser
+
+    def attachParser(self, parser):
+        self.parser = parser
 
     def __launch__(self, port):
         '''
@@ -20,14 +23,21 @@ class Listener(object):
             Handler = HttpServer
             httpd = TCPServer(("",port), Handler, self)
             httpd.serve_forever()
+
+        # No dice. Kill the process.
         except socket.error as msg:
-            # No dice. Kill the process.
             Display.warn('ERROR: Unable to bind socket: {0}'.format(msg))
-            sys.exit(0)
+
 
     def interpret(self, encrypted):
         '''
         Received a message from the TCP Server, so relay it to our message_interpreter
         '''
-        decrypted = self.crypto.decrypt(encrypted)
-        self.message_interpreter.interpret(decrypted)
+        try:
+            decrypted = self.crypto.decrypt(encrypted)
+        except Exception as msg:
+            Display.warn('Warning: General decryption failure\n\n{0}'.format(msg))
+            return
+
+        #Display.debug('{0} received\n{1}'.format(decrypted['type'],decrypted))
+        self.parser.handleMessage(decrypted)
