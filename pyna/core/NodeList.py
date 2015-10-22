@@ -44,6 +44,8 @@ class NodeList(object):
 		new_node = None
 		try:
 			new_node = json.load(open(filename,'r'))
+			if new_node in self.authorized_nodes:
+				return new_node
 			self.authorized_nodes.append(new_node)
 			self.save()
 		except Exception as msg:
@@ -54,7 +56,7 @@ class NodeList(object):
 		'''
 		Returns a nodelist hash
 		'''
-		return ",".join([x['publicKey'] for x in self.authorized_nodes])
+		return ",".join(sorted([x['publicKey'] for x in self.authorized_nodes]))
 
 	def toJson(self):
 		'''
@@ -106,4 +108,4 @@ class NodeList(object):
 		'''
 		Check to see if a node is authorized
 		'''
-		return [node in self.authorized_nodes]
+		return node in self.authorized_nodes

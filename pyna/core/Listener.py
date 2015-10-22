@@ -21,6 +21,7 @@ class Listener(object):
         '''
         try:
             Handler = HttpServer
+            TCPServer.allow_reuse_address = True
             httpd = TCPServer(("",port), Handler, self)
             httpd.serve_forever()
 

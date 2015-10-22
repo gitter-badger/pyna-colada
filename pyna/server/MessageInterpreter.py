@@ -25,17 +25,21 @@ class MessageInterpreter(Interpreter):
 		# Assemble message
 		targets=self.manager.node_list.authorized_nodes
 		content=self.manager.get_node_hash()
-		self.dispatcher.broadcast('ping', targets=targets, content=content)
+		Display.debug(content)
+		self.dispatcher.broadcast('nodelisthash', targets=targets, content=content)
 
 	def received_nodelistdiff(self,msg):
-		targets  = self.manager.node_list.addList(msg['message'])
-		self.dispatcher.broadcast('ping', targets=targetrs)
+		targets=self.manager.node_list.addList(msg['message'])
+		content=self.manager.get_node_hash()
+		Display.debug(content)
+		self.dispatcher.broadcast('nodelisthash', targets=targets, content=content)
 
 	def received_nodelisthash(self,msg):
 		if self.manager.hash_is_identical(msg['message']):
 			return
-		node_list = self.manager.get_node_list()
-		self.dispatcher.send('nodelist', content=node_list, target=msg['sender'])
+		content = self.manager.get_node_list()
+		Display.debug(content)
+		self.dispatcher.send('nodelist', content=content, target=msg['sender'])
 
 	def received_whisper(self, msg):
 		self.manager.most_recent_whisperer = msg['sender']

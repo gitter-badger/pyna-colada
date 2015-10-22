@@ -22,7 +22,7 @@ class PynaDisplay(Display):
         '''Colors the bold from a person based on their client type'''
         if client == "Pyna colada":
             return PynaDisplay.emphasis.yellow
-        if client == "Spiced Gracken":
+        if client == "Spiced Rumby":
             return PynaDisplay.emphasis.red
         return PynaDisplay.emphasis.gray
 
