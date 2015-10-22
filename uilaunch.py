@@ -1,5 +1,5 @@
 import socket, sys
-from pyna.node.UINode import UINode
+from pyna import *
 
 try:
     # Get the local ip address

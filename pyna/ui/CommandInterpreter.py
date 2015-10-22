@@ -1,5 +1,4 @@
 from pyna.base.Interpreter import Interpreter
-from pyna.core.Dispatcher import Dispatcher
 from pyna.ui.PynaDisplay import PynaDisplay
 import sys, time, json
 
