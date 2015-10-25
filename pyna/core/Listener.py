@@ -11,6 +11,8 @@ class Listener(object):
     def __init__(self, crypto, parser=None):
         self.crypto = crypto
         self.parser = parser
+        self.handler_type = HttpServer
+        self.server_type = TCPServer
 
     def attachParser(self, parser):
         self.parser = parser
@@ -20,9 +22,8 @@ class Listener(object):
         Daemonized; Create and bind a socket on the location and port specified at startup
         '''
         try:
-            Handler = HttpServer
-            TCPServer.allow_reuse_address = True
-            httpd = TCPServer(("",port), Handler, self)
+            self.server_type.allow_reuse_address = True
+            httpd = self.server_type(("",port), self.handler_type, self)
             httpd.serve_forever()
 
         # No dice. Kill the process.
@@ -40,5 +41,6 @@ class Listener(object):
             Display.warn('Warning: General decryption failure\n\n{0}'.format(msg))
             return
 
-        #Display.debug('{0} received\n{1}'.format(decrypted['type'],decrypted))
-        self.parser.handleMessage(decrypted)
+        #Display.debug(decrypted)
+        if self.parser is not None:
+            self.parser.handleMessage(decrypted)

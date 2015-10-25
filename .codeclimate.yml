@@ -2,3 +2,5 @@ exclude_paths:
   - uilaunch.py
   - autolaunch.py
   - config/*
+  - password.py
+  - clean.py

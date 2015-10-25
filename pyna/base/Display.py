@@ -39,7 +39,7 @@ class Display(object):
 
 	def color_print(message,printed_color='\033[37m'):
 		'''Formats a message with a specific color (as Display.color)'''
-		print(printed_color + message + Display.color.end)
+		print('{0}{1}{2}'.format(printed_color, message, Display.color.end))
 
 	def bold(message, color_after='\033[49m', bold_color='\033[1m'):
 		# insert bold tag, end tag, and color_after
