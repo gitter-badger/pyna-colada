@@ -9,6 +9,12 @@ class Settings(object):
         self.getUid()
         self.createCrypto()
 
+    def createCrypto(self):
+        self.crypto = Crypto()
+        self.keyloader = KeyLoader()
+        self.loadKeys()
+
+
     def getUid(self):
         '''Load UID from users.json or create it'''
         users = json.load(open('config/users.json','r'))
@@ -16,7 +22,7 @@ class Settings(object):
             self.uid = users[self.alias]
         except Exception as msg:
             self.uid = self.generateUid(32)
-            PynaDisplay.warn('Generated New UID: {0}'.format(self.uid))
+            Display.warn('Generated New UID: {0}'.format(self.uid))
             users[self.alias] = self.uid
             with open('config/users.json','w') as out:
                 json.dump(users, out)
@@ -24,11 +30,6 @@ class Settings(object):
     def generateUid(self, size=6, chars=string.ascii_uppercase + string.digits):
         return ''.join(random.choice(chars) for x in range(size))
 
-
-    def createCrypto(self):
-        self.crypto = Crypto()
-        self.keyloader = KeyLoader()
-        self.loadKeys()
 
     def generateKeys(self):
         '''
@@ -50,7 +51,9 @@ class Settings(object):
         self.passwordLoop(filename)
 
     def passwordLoop(self, filename):
-        '''Loops until the correct password is entered'''
+        '''
+        Loops until the correct password is entered
+        '''
         attempts = 0
         while attempts < 3:
             password = input('Please enter password to unlock ({0} attempts remaining):  '.format(3-attempts))

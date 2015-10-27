@@ -17,7 +17,7 @@ class BaseNode(object):
 
     def initialize(self):
         ''' Create Base Components'''
-        self.crypto = Crypto()
+        self.crypto = self.manager.crypto
         self.listener = Listener(self.crypto)
         self.sender = Sender(self.crypto)
         self.dispatcher = Dispatcher(self.manager, self.sender)
@@ -33,7 +33,7 @@ class BaseNode(object):
     def export(self):
         '''Export the JSON containing all pertinent information about this node'''
         data = {"uid": self.manager.uid, "alias": self.alias, "location": ':'.join([self.location,self.port])}
-        data["publicKey"] = self.crypto.getPublic().decode('utf-8')
+        data["publicKey"] = self.manager.crypto.getPublic().decode('utf-8')
 
         # Add into Nodelist
         self.manager.node_list.add(data)
@@ -46,7 +46,7 @@ class BaseNode(object):
         '''Start up this node'''
         self.initialize()
         self.start_up_listener()
-        #self.export()
+        self.export()
 
         #Send a default ping
         self.dispatcher.broadcast('ping',targets=self.manager.node_list.authorized_nodes)
