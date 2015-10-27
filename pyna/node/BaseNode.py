@@ -1,4 +1,4 @@
-from pyna.core.Crypto import Crypto
+from pyna.base.Crypto import Crypto
 from pyna.core.Dispatcher import Dispatcher
 from pyna.core.Listener import Listener
 from pyna.core.Manager import Manager
@@ -17,7 +17,7 @@ class BaseNode(object):
 
     def initialize(self):
         ''' Create Base Components'''
-        self.crypto = Crypto(self.manager.uid)
+        self.crypto = self.manager.crypto
         self.listener = Listener(self.crypto)
         self.sender = Sender(self.crypto)
         self.dispatcher = Dispatcher(self.manager, self.sender)
@@ -33,7 +33,7 @@ class BaseNode(object):
     def export(self):
         '''Export the JSON containing all pertinent information about this node'''
         data = {"uid": self.manager.uid, "alias": self.alias, "location": ':'.join([self.location,self.port])}
-        data["publicKey"] = self.crypto.getPublic().decode('utf-8')
+        data["publicKey"] = self.manager.crypto.getPublic().decode('utf-8')
 
         # Add into Nodelist
         self.manager.node_list.add(data)

@@ -1,6 +1,6 @@
 import json
+from pyna.base.Crypto import Crypto
 from pyna.base.Parser import Parser
-from pyna.core.Crypto import Crypto
 from pyna.server.MessageInterpreter import MessageInterpreter
 from pyna.ui.PynaDisplay import PynaDisplay
 

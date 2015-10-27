@@ -9,11 +9,6 @@ class Crypto(object):
 	'''
 	Sole component of RSA encryption and decryption
 	'''
-
-	def __init__(self, uid):
-		self.uid = uid
-		self.loadKeys()
-
 	def getPublic(self):
 		return self.private.publickey().exportKey('PEM')
 
@@ -71,35 +66,10 @@ class Crypto(object):
 
 		return js
 
-	def generateKeys(self):
-		'''
-		Generate new RSA-2048 keys for this client (accurate off)
-		'''
-		self.private = RSA.generate(2048)
-		#(public,private) = rsa.newkeys(2048,accurate=False)
-		self.saveKeys()
-
-	def loadKeys(self):
-		'''
-		Load public and private key from key.json; generates if empty
-		'''
-		try:
-			with open('config/keys/{0}.pyna'.format(self.uid),'rb') as key:
-				data = pickle.load(key)
-				self.private = RSA.importKey(data['privateKey'])
-		except:
-			Display.log('Generating new keys...')
-			self.generateKeys()
-			Display.log('Done.\n')
-
+	def load(self, data):
+		self.private = RSA.importKey(data)
 		self.cipher = PKCS1_v1_5.new(self.private)
 
-	def saveKeys(self):
-		'''
-		Save public and private key to key.json
-		'''
-		privout = self.private.exportKey('PEM').decode('utf-8')
-		data = {"privateKey":privout}
-
-		with open('config/keys/{0}.pyna'.format(self.uid),'wb') as auth:
-			pickle.dump(data, auth)
+	def generate(self):
+		self.private = RSA.generate(2048)
+		self.cipher = PKCS1_v1_5.new(self.private)

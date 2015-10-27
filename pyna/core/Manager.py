@@ -1,15 +1,16 @@
-import hashlib, json, os, string, random
+import hashlib, json, os
+from pyna.base.Settings import Settings
 from pyna.core.Packager import Packager
 from pyna.core.NodeList import NodeList
 from pyna.ui.PynaDisplay import PynaDisplay
 
-class Manager(object):
+class Manager(Settings):
 	'''
 	Manages all things related to other nodes and configuration settings
 	'''
 
 	def __init__(self, alias, location, port):
-		self.alias = alias
+		super().__init__(alias)
 		self.active_nodes = []
 		self.most_recent_whisperer = None
 		self.location = '{0}:{1}'.format(location,port)
@@ -27,7 +28,6 @@ class Manager(object):
 		config = json.load(open('config/config.json','r'))
 
 		self.version = config['version']
-		self.getUid()
 		self.node_list.load()
 
 	def whisperToggle(self, target):
@@ -46,17 +46,6 @@ class Manager(object):
 		config = json.load(open('config/config.json','r'))
 		return config['bindings']
 
-	def getUid(self):
-		'''Load UID from users.json or create it'''
-		users = json.load(open('config/users.json','r'))
-		try:
-			self.uid = users[self.alias]
-		except Exception as msg:
-			self.uid = self.generateUid(32)
-			PynaDisplay.warn('Generated New UID: {0}'.format(self.uid))
-			users[self.alias] = self.uid
-			with open('config/users.json','w') as out:
-				json.dump(users, out)
 
 	def addToBlackList(self, target, message):
 		node = self.getNode(target)
@@ -67,9 +56,6 @@ class Manager(object):
 		b[node['location']] = message
 		with open('config/blacklist.json','w') as blacklist:
 			json.dump(b, blacklist)
-
-	def generateUid(self, size=6, chars=string.ascii_uppercase + string.digits):
-		return ''.join(random.choice(chars) for x in range(size))
 
 	def createConfig(self):
 		data = {"version": "0.5.0","name": "Py\u00d1a Colada","users": []}
