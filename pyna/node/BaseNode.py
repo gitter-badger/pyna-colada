@@ -1,4 +1,4 @@
-from pyna.core.Crypto import Crypto
+from pyna.base.Crypto import Crypto
 from pyna.core.Dispatcher import Dispatcher
 from pyna.core.Listener import Listener
 from pyna.core.Manager import Manager
@@ -17,7 +17,7 @@ class BaseNode(object):
 
     def initialize(self):
         ''' Create Base Components'''
-        self.crypto = Crypto(self.manager.uid)
+        self.crypto = Crypto()
         self.listener = Listener(self.crypto)
         self.sender = Sender(self.crypto)
         self.dispatcher = Dispatcher(self.manager, self.sender)
@@ -46,7 +46,7 @@ class BaseNode(object):
         '''Start up this node'''
         self.initialize()
         self.start_up_listener()
-        self.export()
+        #self.export()
 
         #Send a default ping
         self.dispatcher.broadcast('ping',targets=self.manager.node_list.authorized_nodes)

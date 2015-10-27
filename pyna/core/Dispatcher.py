@@ -1,5 +1,5 @@
 import json, sys, hashlib
-from pyna.core.Crypto import Crypto
+from pyna.base.Crypto import Crypto
 from pyna.core.Packager import Packager
 from pyna.ui.PynaDisplay import PynaDisplay
 
