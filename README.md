@@ -1,4 +1,6 @@
 #PyÑa Colada [![Code Climate](https://codeclimate.com/github/etkirsch/pyna-colada/badges/gpa.svg)](https://codeclimate.com/github/etkirsch/pyna-colada) [![Test Coverage](https://codeclimate.com/github/etkirsch/pyna-colada/badges/coverage.svg)](https://codeclimate.com/github/etkirsch/pyna-colada/coverage)
+
+[![Join the chat at https://gitter.im/etkirsch/pyna-colada](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/etkirsch/pyna-colada?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 A `mesh-chat` application built in Python 3.4.3. PyÑa Colada uses combined RSA (PKCS1 1.5) and AES-256 encryption for sending and receiving messages. It is a nearly-fully-featured, fully-configurable chat client that can be run in a bash terminal. PyÑa Colada also implements a modularized architecture intended for easy substitions (e.g. replacing the UI portion with a neural network or custom python script for autonomy).
 
 
